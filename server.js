@@ -30,7 +30,9 @@ connectDB();
 app.use(cors())
 app.use(bodyParser.json())
 
-
+app.get('/',(req,res)=>{
+  res.send('Welcome to brarat transact')
+})
 app.use('/auth/api/',authRounter);
 app.use('/api/transaction/',transactionRouter);
 app.use('/api/money-request/',moneyRequestRounter);
