@@ -4,7 +4,7 @@ const mongoose = require('mongoose')
 const generateTransactionNumber = async () => {
   const lastTransaction = await Transaction.findOne().sort({ transactionNumber: -1 }).limit(1);
   const lastNumber = lastTransaction ? parseInt(lastTransaction.transactionNumber) : 0;
-  return (lastNumber + 1).toString().padStart(6, '0'); // Pad the number to a 6-digit string
+  return (lastNumber + 1).toString().padStart(8, '0'); // Pad the number to a 6-digit string
 };
 //// Dummy Route to send money
 
