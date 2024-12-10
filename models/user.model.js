@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
     lastName: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    bharactTransactionId: { type: String, required: true, unique: true },
+    // bharactTransactionId: { type: String, required: true, unique: true },
     balance: { type: Number,default:10000 },
     isEmailVerified: { type: Boolean, default: false },
     emailOtp: { type: String },

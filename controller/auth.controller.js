@@ -71,6 +71,7 @@ const getUserDetails = async(req,res) =>{
 
 // user login controller
 const userLogin = async (req, res) => {
+
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -128,7 +129,7 @@ const UserSignUp = async (req, res) => {
         if (existingUser) {
             return res.status(409).json({ message: "Email already in use." });
         }
-        console.log("0")
+
         // Generate OTP
         const otp = Math.floor(1000+ Math.random() * 10000);
         const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // OTP valid for 10 minutes

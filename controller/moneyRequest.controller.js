@@ -8,11 +8,12 @@ const { Transaction } = require('../models/transaction.model')
 
 const sendMoneyRequest = async (req, res) => {
   const { fromEmail, toEmail, amount } = req.body;
-  console.log(req.body)
+  const {userId} = require.user
+  // console.log(req.body)
   try {
-    // Find users
-    console.log(fromEmail, toEmail)
-    const fromUser = await User.findOne({ email: fromEmail });
+    // // Find users
+    // console.log(fromEmail, toEmail)
+    const fromUser = await User.findById(userId);
     const toUser = await User.findOne({ email: toEmail });
 
 
