@@ -119,11 +119,10 @@ const resendSendEmailVerifyOtp = async (req, res) => {
     const otpCode = Math.floor(1000 + Math.random() * 9000);
     const otpExpiry = Date.now() + 10 * 60 * 1000; 
 
-    await Otp.findOneAndUpdate(
+    await User.findOneAndUpdate(
       { email },
       { 
-        emailOtp, 
-        otpCode, 
+        emailOtp:otpCode, 
         otpExpiry 
       },
       { 
