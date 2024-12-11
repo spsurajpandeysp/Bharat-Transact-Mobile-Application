@@ -120,7 +120,7 @@ const resendSendEmailVerifyOtp = async (req, res) => {
     }
 
     // Generate a new OTP
-    const otpCode = crypto.randomInt(100000, 999999);
+    const otpCode = Math.floor(1000 + Math.random() * 9000);
     const otpExpiry = Date.now() + 10 * 60 * 1000; // OTP valid for 10 minutes
 
     // Save the OTP in the database (upsert)
@@ -179,7 +179,7 @@ const UserSignUp = async (req, res) => {
         }
 
         // Generate OTP
-        const otp = Math.floor(1000+ Math.random() * 10000);
+        const otp = Math.floor(1000+ Math.random() * 9000);
         const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // OTP valid for 10 minutes
         // Send OTP via email
         await transporter.sendMail({
@@ -260,7 +260,7 @@ const forgetPasword = async (req, res) => {
         }
 
         // Generate OTP for password reset
-        const resetOtp = Math.floor(1000+Math.random()*10000);
+        const resetOtp = Math.floor(1000+Math.random()*9000);
         const resetOtpExpiry = new Date(Date.now() + 10 * 60 * 1000); // OTP valid for 10 minutes
 
         // Send OTP via email
