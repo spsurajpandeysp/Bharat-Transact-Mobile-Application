@@ -8,6 +8,7 @@ router.post("/forget-pass",authController.forgetPasword)
 router.get("/users",authController.getAllUsers)
 router.post("/email-verify",authController.emailVerify)
 router.post("/forget-password",authController.forgetPasword)
+router.post("/resend-email-verify-otp",authController.resendSendEmailVerifyOtp)
 router.post("/reset-password",authController.resetPassword)
 
 
