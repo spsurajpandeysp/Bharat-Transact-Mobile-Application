@@ -1,12 +1,7 @@
 const {User} = require('../models/user.model')
 const {Transaction} = require('../models/transaction.model')
 const mongoose = require('mongoose')
-// const generateTransactionNumber = async () => {
-//   const lastTransaction = await Transaction.findOne().sort({ transactionNumber: -1 }).limit(1);
-//   const lastNumber = lastTransaction ? parseInt(lastTransaction.transactionNumber) : 0;
-//   return (lastNumber + 1).toString().padStart(8, '0'); // Pad the number to a 6-digit string
-// };
-//// Dummy Route to send money
+
 
 const sendMoney = async (req, res) => {
   const { recipient, amount } = req.body;
@@ -20,7 +15,7 @@ const sendMoney = async (req, res) => {
   session.startTransaction();
 
   try {
-      // Get both accounts by their IDs
+     
       const fromAccount = await User.findById(userId).session(session);
       const toAccount = await User.findOne({ email: recipient }).session(session);
 
@@ -32,25 +27,22 @@ const sendMoney = async (req, res) => {
         throw new Error("You not send money in your Account");
     }
 
-      // Check if the sender has enough balance
+   
       if (fromAccount.balance < amount) {
           throw new Error("Insufficient funds.");
       }
 
-      // Perform the transaction (debit and credit)
+   
       fromAccount.balance = Number(fromAccount.balance) - Number(amount);
       toAccount.balance = Number(toAccount.balance) + Number(amount);
 
-      // Save changes to the accounts
+
       await fromAccount.save({ session });
       await toAccount.save({ session });
 
-      // Generate a new transaction number
-      // const transactionNumber = await generateTransactionNumber();
-
-      // Create a transaction history entry
+  
       const transaction = new Transaction({
-          // transactionNumber,
+       
           fromUser: fromAccount._id,
           toUser: toAccount._id,
           amount,
@@ -59,16 +51,16 @@ const sendMoney = async (req, res) => {
       const response = await transaction.save({ session });
       console.log(response)
 
-      // Commit the transaction
+  
       await session.commitTransaction();
       session.endSession();
 
       res.status(200).json({
           message: "Transaction successful!",
-          transactionId:response._id, // Return the transaction number
+          transactionId:response._id, 
       });
   } catch (error) {
-      // Abort the transaction in case of error
+    
       await session.abortTransaction();
       session.endSession();
 
@@ -78,7 +70,7 @@ const sendMoney = async (req, res) => {
 
 
 
-// Transaction History Route
+
 
 const getTransactionHistory = async (req, res) => {
   const { userId } = req.user;
@@ -88,7 +80,7 @@ const getTransactionHistory = async (req, res) => {
   }
 
   try {
-    // Fetch transactions involving the user as sender or receiver
+ 
     const transactions = await Transaction.find({
       $or: [{ fromUser: userId }, { toUser: userId }]
     })
@@ -124,7 +116,7 @@ const getTransactionHistory = async (req, res) => {
 
 const getAllTransactionHistory = async(req,res) => {
   try {
-    // Find transactions related to the provided Bharact Transaction ID
+  
     const transactions = await Transaction.find({});
     if (transactions.length === 0) {
       return res.status(404).json({ message: "No transactions found." });

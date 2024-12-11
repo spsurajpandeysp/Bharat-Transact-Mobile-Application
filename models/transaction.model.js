@@ -1,7 +1,6 @@
 
 const mongoose = require('mongoose')
 
-// Transaction Schema
 const transactionSchema = new mongoose.Schema({
     // transactionNumber: { type: String, required: true },
     fromUser: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },

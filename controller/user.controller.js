@@ -15,9 +15,9 @@ const helpUser = async(req, res) => {
   
     let reply = "";
   
-    // Process user message
+
     if (message.toLowerCase().includes("balance")) {
-      // Extract bharactTransactionId from message
+   
       const bharactIdMatch = message.match(/BHT\d+/);
       if (bharactIdMatch) {
         const bharactTransactionId = bharactIdMatch[0];
@@ -32,7 +32,7 @@ const helpUser = async(req, res) => {
         reply = "Please provide your Bharact ID to check the balance.";
       }
     } else if (message.toLowerCase().includes("transaction history")) {
-      // Extract bharactTransactionId from message
+ 
       const bharactIdMatch = message.match(/BHT\d+/);
       if (bharactIdMatch) {
         const bharactTransactionId = bharactIdMatch[0];
@@ -62,22 +62,20 @@ const helpUser = async(req, res) => {
 
 const updateUserDetails = async(req,res) =>{
   const { email, firstName, lastName, address } = req.body;
-  let profilePic = req.file ? req.file.filename : null;  // Profile pic filename
+  let profilePic = req.file ? req.file.filename : null;  
 
   try {
-    // Find the user by email (you can also use session or JWT for authentication)
+   
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    // Update user details
     if (firstName) user.firstName = firstName;
     if (lastName) user.lastName = lastName;
     if (address) user.address = address;
-    if (profilePic) user.profilePic = profilePic;  // Update profile pic
+    if (profilePic) user.profilePic = profilePic;  
 
-    // Save updated user details
     await user.save();
 
     res.status(200).json({ message: 'User details updated successfully!', user });
@@ -97,17 +95,16 @@ const getUserDetailsByEmail = async(req,res) =>{
   const { email } = req.params;
 
   try {
-    // Find user by email
+
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    // Return user details excluding password (if applicable)
     const userDetails = {
       firstName: user.firstName,
       lastName: user.lastName,
-      profilePic: user.profilePic,  // URL or filename of the profile picture
+      profilePic: user.profilePic, 
       address: user.address
     };
 
@@ -124,14 +121,14 @@ const getBalance = async (req, res) => {
   }
 
   try {
-    // Find the user by their email
+ 
     const user = await User.findById(userId);
 
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
 
-    // Return the balance
+
     res.status(200).json({name:`${user.firstName} ${user.lastName}` ,balance: user.balance });
   } catch (error) {
     res.status(500).json({ message: "Error fetching balance.", error: error.message });
