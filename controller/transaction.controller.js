@@ -13,7 +13,7 @@ const sendMoney = async (req, res) => {
   const { userId } = req.user;
 
   if (!userId || !recipient || !amount || amount <= 0) {
-      return res.status(400).json({ message: "Invalid input." });
+      return res.status(400).json({ message: "Invalid input. or Required All Fields" });
   }
 
   const session = await mongoose.startSession();
@@ -27,6 +27,10 @@ const sendMoney = async (req, res) => {
       if (!fromAccount || !toAccount) {
           throw new Error("One or both accounts not found.");
       }
+
+      if (fromAccount._id ==  toAccount._id) {
+        throw new Error("You To Not send money in your Account");
+    }
 
       // Check if the sender has enough balance
       if (fromAccount.balance < amount) {
