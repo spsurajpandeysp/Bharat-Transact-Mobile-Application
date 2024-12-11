@@ -1,11 +1,11 @@
 const {User} = require('../models/user.model')
 const {Transaction} = require('../models/transaction.model')
 const mongoose = require('mongoose')
-const generateTransactionNumber = async () => {
-  const lastTransaction = await Transaction.findOne().sort({ transactionNumber: -1 }).limit(1);
-  const lastNumber = lastTransaction ? parseInt(lastTransaction.transactionNumber) : 0;
-  return (lastNumber + 1).toString().padStart(8, '0'); // Pad the number to a 6-digit string
-};
+// const generateTransactionNumber = async () => {
+//   const lastTransaction = await Transaction.findOne().sort({ transactionNumber: -1 }).limit(1);
+//   const lastNumber = lastTransaction ? parseInt(lastTransaction.transactionNumber) : 0;
+//   return (lastNumber + 1).toString().padStart(8, '0'); // Pad the number to a 6-digit string
+// };
 //// Dummy Route to send money
 
 const sendMoney = async (req, res) => {
@@ -27,8 +27,7 @@ const sendMoney = async (req, res) => {
       if (!fromAccount || !toAccount) {
           throw new Error("One or both accounts not found.");
       }
-      console.log(fromAccount._id,toAccount._id)
-      console.log(fromAccount.email,toAccount.email)
+
       if (fromAccount.email ==  toAccount.email) {
         throw new Error("You To Not send money in your Account");
     }
@@ -47,17 +46,18 @@ const sendMoney = async (req, res) => {
       await toAccount.save({ session });
 
       // Generate a new transaction number
-      const transactionNumber = await generateTransactionNumber();
+      // const transactionNumber = await generateTransactionNumber();
 
       // Create a transaction history entry
       const transaction = new Transaction({
-          transactionNumber,
+          // transactionNumber,
           fromUser: fromAccount._id,
           toUser: toAccount._id,
           amount,
           status: "Success",
       });
-      await transaction.save({ session });
+      const response = await transaction.save({ session });
+      console.log(response)
 
       // Commit the transaction
       await session.commitTransaction();
@@ -65,7 +65,7 @@ const sendMoney = async (req, res) => {
 
       res.status(200).json({
           message: "Transaction successful!",
-          transactionNumber, // Return the transaction number
+          transactionId:response._id, // Return the transaction number
       });
   } catch (error) {
       // Abort the transaction in case of error
