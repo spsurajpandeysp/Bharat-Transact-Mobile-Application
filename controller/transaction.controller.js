@@ -24,12 +24,12 @@ const sendMoney = async (req, res) => {
       const fromAccount = await User.findById(userId).session(session);
       const toAccount = await User.findOne({ email: recipient }).session(session);
 
-      if (!fromAccount || !toAccount) {
-          throw new Error("One or both accounts not found.");
+      if (!toAccount) {
+          throw new Error("Receiver Account not found.");
       }
 
       if (fromAccount.email ==  toAccount.email) {
-        throw new Error("You To Not send money in your Account");
+        throw new Error("You not send money in your Account");
     }
 
       // Check if the sender has enough balance
