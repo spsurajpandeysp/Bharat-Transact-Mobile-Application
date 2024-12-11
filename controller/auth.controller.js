@@ -5,7 +5,6 @@ const {User} = require('../models/user.model')
 require('dotenv').config();
 
 
-// Create transporter for sending mail
 const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -19,7 +18,7 @@ const generateAccountNumber = () => {
     return Math.floor(1000000000 + Math.random() * 9000000000).toString();  // Generates a 10-digit number
   };
   
-  // Function to create a new user with a unique account number
+
 const createUniqueAccount = async (name) => {
     let accountNumber;
     let accountExists = true;
@@ -29,10 +28,10 @@ const createUniqueAccount = async (name) => {
       accountNumber = generateAccountNumber();
       formattedTransactionId = `${accountNumber}@bht`;
 
-      // Check if the account number already exists in the database
+ 
       const existingUser = await User.findOne({ formattedTransactionId });
   
-      // If account number doesn't exist, break the loop
+
       if (!existingUser) {
         accountExists = false;
       }
@@ -43,19 +42,16 @@ const createUniqueAccount = async (name) => {
 };
 
 
-// Get User Details using email extracted from JWT token
-// app.get('/get-user-details', authenticateToken, async (req, res) => {
 const getUserDetails = async(req,res) =>{
-    const email = req.userEmail;  // Get email from the middleware
+    const email = req.userEmail;  
   
     try {
-      // Find the user by email in the database
+   
       const user = await User.findOne({ email });
       if (!user) {
         return res.status(404).json({ message: 'User not found.' });
       }
   
-      // Return user details
       const userDetails = {
         firstName: user.firstName,
         lastName: user.lastName,
@@ -69,7 +65,7 @@ const getUserDetails = async(req,res) =>{
     }
   }
 
-// user login controller
+
 const userLogin = async (req, res) => {
 
     const { email, password } = req.body;
@@ -108,29 +104,35 @@ const resendSendEmailVerifyOtp = async (req, res) => {
   }
 
   try {
-    // Check if the user exists
+
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
 
-    // Check if the email is already verified
+
     if (user.isEmailVerified) {
       return res.status(400).json({ message: "Email is already verified." });
     }
+    console.log('dsfsdfdsfdsfdsdfsssssdf')
 
-    // Generate a new OTP
     const otpCode = Math.floor(1000 + Math.random() * 9000);
-    const otpExpiry = Date.now() + 10 * 60 * 1000; // OTP valid for 10 minutes
+    const otpExpiry = Date.now() + 10 * 60 * 1000; 
 
-    // Save the OTP in the database (upsert)
     await Otp.findOneAndUpdate(
       { email },
-      { emailOtp, emailOtp },
-      { otpExpiry: otpExpiry }
+      { 
+        emailOtp, 
+        otpCode, 
+        otpExpiry 
+      },
+      { 
+        new: true, 
+        upsert: true
+      } 
     );
+    
 
-    // Send the OTP via email
 
 
     const mailOptions = {
@@ -149,7 +151,7 @@ const resendSendEmailVerifyOtp = async (req, res) => {
   }
 };
 
-// User SignUp controller
+
 
 const UserSignUp = async (req, res) => {
     const {
@@ -160,7 +162,6 @@ const UserSignUp = async (req, res) => {
         confirmPassword,
     } = req.body;
 
-    // Validation
     if (!firstName || !lastName || !email || !password || !confirmPassword) {
         return res.status(400).json({ message: "All fields are required." });
     }
@@ -168,20 +169,19 @@ const UserSignUp = async (req, res) => {
         return res.status(400).json({ message: "Passwords do not match." });
     }
 
-    // Connect to server
 
 
     try {
-        // Check if email or BharactTransactionId already exists
+    
         const existingUser = await User.findOne({email })
         if (existingUser) {
             return res.status(409).json({ message: "Email already in use." });
         }
 
-        // Generate OTP
+
         const otp = Math.floor(1000+ Math.random() * 9000);
-        const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // OTP valid for 10 minutes
-        // Send OTP via email
+        const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); 
+
         await transporter.sendMail({
             from:process.env.EMAIL_APP_PASSWORD,
             to: email,
@@ -189,11 +189,9 @@ const UserSignUp = async (req, res) => {
             text: `Your OTP for email verification is ${otp}. It is valid for 10 minutes.`,
         });
 
-        // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
         const formattedTransactionId = await createUniqueAccount();
 
-        // Save user with OTP and set email as not verified
         console.log("fds")
         const newUser = new User({
             firstName,
@@ -212,7 +210,7 @@ const UserSignUp = async (req, res) => {
     }
 }
 
-// Email Verify Controller
+
 const emailVerify = async (req, res) => {
     const { email, otp } = req.body;
 
@@ -245,7 +243,7 @@ const emailVerify = async (req, res) => {
     }
 }
 
-// Forgot Password controller
+
 const forgetPasword = async (req, res) => {
     const { email } = req.body;
 
@@ -259,18 +257,18 @@ const forgetPasword = async (req, res) => {
             return res.status(404).json({ message: "User not found." });
         }
 
-        // Generate OTP for password reset
-        const resetOtp = Math.floor(1000+Math.random()*9000);
-        const resetOtpExpiry = new Date(Date.now() + 10 * 60 * 1000); // OTP valid for 10 minutes
 
-        // Send OTP via email
+        const resetOtp = Math.floor(1000+Math.random()*9000);
+        const resetOtpExpiry = new Date(Date.now() + 10 * 60 * 1000); 
+
+ 
         await transporter.sendMail({
             to: email,
             subject: "Reset Password OTP",
             text: `Your OTP to reset your password is ${resetOtp}. It is valid for 10 minutes.`,
         });
 
-        // Save OTP and expiry to user
+  
         user.resetOtp = resetOtp;
         user.resetOtpExpiry = resetOtpExpiry;
         await user.save();
@@ -281,7 +279,7 @@ const forgetPasword = async (req, res) => {
     }
 }
 
-// Reset password controller
+
 const resetPassword = async(req,res)=>{
     const { email, otp, newPassword, confirmNewPassword } = req.body;
 
@@ -303,7 +301,7 @@ const resetPassword = async(req,res)=>{
       return res.status(400).json({ message: "Invalid or expired OTP." });
     }
 
-    // Hash new password and update user
+ 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
     user.resetOtp = undefined;
