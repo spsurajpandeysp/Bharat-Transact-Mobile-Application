@@ -43,53 +43,111 @@ const createUniqueAccount = async (name) => {
 };
 
 
-
-const resendSendEmailVerifyOtp = async (req, res) => {
-    const { email } = req.body;
-  
-    if (!email) {
-      return res.status(400).json({ message: "Email is required." });
-    }
+// Get User Details using email extracted from JWT token
+// app.get('/get-user-details', authenticateToken, async (req, res) => {
+const getUserDetails = async(req,res) =>{
+    const email = req.userEmail;  // Get email from the middleware
   
     try {
-      // Check if the user exists
+      // Find the user by email in the database
       const user = await User.findOne({ email });
       if (!user) {
-        return res.status(404).json({ message: "User not found." });
+        return res.status(404).json({ message: 'User not found.' });
       }
   
-      // Check if the email is already verified
-      if (User.isEmailVerified) {
-        return res.status(400).json({ message: "Email is already verified." });
-      }
-  
-      // Generate a new OTP
-      const otpCode = crypto.randomInt(100000, 999999);
-      const otpExpiry = Date.now() + 10 * 60 * 1000; // OTP valid for 10 minutes
-  
-      // Save the OTP in the database (upsert)
-      await User.findOneAndDelete(
-        { email },
-        { emailOtp,otpCode },
-        { otpExpiry: otpExpiry }
-      );
-  
-
-      const mailOptions = {
-        from: process.env.EMAIL,
-        to: email,
-        subject: "Resend: Verify Your Email",
-        text: `Your OTP is ${otpCode}. It is valid for 10 minutes.`,
+      // Return user details
+      const userDetails = {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profilePic: user.profilePic,
+        address: user.address
       };
   
-      await transporter.sendMail(mailOptions);
-  
-      res.status(200).json({ message: "OTP sent successfully. Please check your email." });
+      res.status(200).json({ message: 'User details fetched successfully!', userDetails });
     } catch (error) {
-      res.status(500).json({ message: "Error in resending OTP.", error });
+      res.status(500).json({ message: 'Error fetching user details.', error: error.message });
     }
-  };
+  }
 
+// user login controller
+const userLogin = async (req, res) => {
+
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required." });
+    }
+
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        if (!user.isEmailVerified) {
+            return res.status(401).json({ message: "Please verify your email before logging in." });
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: "Invalid credentials." });
+        }
+
+        const token = jwt.sign({ userId: user._id }, "suraj@321");
+        res.status(200).json({ message: "Login successful.", token });
+    } catch (error) {
+        res.status(500).json({ message: "Error logging in.", error });
+    }
+}
+
+const resendSendEmailVerifyOtp = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: "Email is required." });
+  }
+
+  try {
+    // Check if the user exists
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Check if the email is already verified
+    if (user.isEmailVerified) {
+      return res.status(400).json({ message: "Email is already verified." });
+    }
+
+    // Generate a new OTP
+    const otpCode = crypto.randomInt(100000, 999999);
+    const otpExpiry = Date.now() + 10 * 60 * 1000; // OTP valid for 10 minutes
+
+    // Save the OTP in the database (upsert)
+    await Otp.findOneAndUpdate(
+      { email },
+      { emailOtp, emailOtp },
+      { otpExpiry: otpExpiry }
+    );
+
+    // Send the OTP via email
+
+
+    const mailOptions = {
+      from: process.env.EMAIL,
+      to: email,
+      subject: "Resend: Verify Your Email",
+      text: `Your OTP is ${otpCode}. It is valid for 10 minutes.`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ message: "OTP sent successfully. Please check your email." });
+  } catch (error) {
+    console.error("Error in resendSendEmailVerifyOtp:", error);
+    res.status(500).json({ message: "Error in resending OTP.", error });
+  }
+};
 
 // User SignUp controller
 
