@@ -183,6 +183,7 @@ const UserSignUp = async (req, res) => {
         const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // OTP valid for 10 minutes
         // Send OTP via email
         await transporter.sendMail({
+            from:process.env.EMAIL_APP_PASSWORD,
             to: email,
             subject: "Email Verification OTP",
             text: `Your OTP for email verification is ${otp}. It is valid for 10 minutes.`,
@@ -193,6 +194,7 @@ const UserSignUp = async (req, res) => {
         const formattedTransactionId = await createUniqueAccount();
 
         // Save user with OTP and set email as not verified
+        console.log("fds")
         const newUser = new User({
             firstName,
             lastName,
