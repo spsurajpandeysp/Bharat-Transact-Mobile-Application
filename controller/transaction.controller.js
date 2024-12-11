@@ -27,8 +27,9 @@ const sendMoney = async (req, res) => {
       if (!fromAccount || !toAccount) {
           throw new Error("One or both accounts not found.");
       }
-
-      if (fromAccount._id ==  toAccount._id) {
+      console.log(fromAccount._id,toAccount._id)
+      console.log(fromAccount.email,toAccount.email)
+      if (fromAccount.email ==  toAccount.email) {
         throw new Error("You To Not send money in your Account");
     }
 
