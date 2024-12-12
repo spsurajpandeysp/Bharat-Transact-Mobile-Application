@@ -197,7 +197,7 @@ const UserSignUp = async (req, res) => {
             lastName,
             email,
             password: hashedPassword,
-            bharactTransactionId: formattedTransactionId,
+            // bharactTransactionId: formattedTransactionId,
             emailOtp:otp,
             otpExpiry
         
