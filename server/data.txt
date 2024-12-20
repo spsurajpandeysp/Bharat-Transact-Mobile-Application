@@ -15,3 +15,4 @@ resend api error solved
 forgetpass route added
 vercel config changed
 route added in server
+timeout issue solved
