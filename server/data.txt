@@ -14,3 +14,4 @@ qr code added
 resend api error solved
 forgetpass route added
 vercel config changed
+route added in server
