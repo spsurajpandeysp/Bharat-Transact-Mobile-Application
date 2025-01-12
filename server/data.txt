@@ -8,3 +8,4 @@ Profile Page api integration
 Bank Transfer api integration
 Ui improvement of profile
 Package.json updated
+routes changed
