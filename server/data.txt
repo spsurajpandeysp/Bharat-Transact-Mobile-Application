@@ -5,3 +5,4 @@ Home page theme changed
 Send Money botton style changed
 Profile Section Api created
 Profile Page api integration
+Bank Transfer api integration
