@@ -15,6 +15,8 @@ const generateResponse = async (req, res) => {
       { keywords: ["bank transfer", "bank se bhejo", "bank se paisa bhejna hai", "bank se transfer karna hai", "bank mein bhejna hai", "bank mein paisa dalna hai"], reply: "Please go back and use the Bank Transfer section to complete your transaction." },
       { keywords: ["scan and pay", "qr pay", "qr code se pay karna hai", "scan kar ke pay karna hai", "scan se payment karna hai"], reply: "Please go to the Scan and Pay section to complete your transaction." },
       { keywords: ["transaction history", "transaction dekhna hai", "transaction ka record", "transaction ka itihas", "transaction ka details", "transaction details dekhna hai"], reply: "Please go to the Transaction History section to view your transactions." },
+      { keywords: ["transaction history", "transaction dekhna hai", "transaction ka record", "transaction ka itihas", "transaction ka details", "transaction details dekhna hai"], reply: "Please go to the Transaction History section to view your transactions." },
+      { keywords: ["transaction history", "transaction dekhna hai", "transaction ka record", "transaction ka itihas", "transaction ka details", "transaction details dekhna hai"], reply: "Please go to the Transaction History section to view your transactions." },
     ];
     const lowerPrompt = prompt.toLowerCase();
     for (const custom of customPrompts) {

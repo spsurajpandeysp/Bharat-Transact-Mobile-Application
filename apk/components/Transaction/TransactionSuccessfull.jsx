@@ -91,6 +91,7 @@ const TransactionSuccessfull = ({ navigation, route }) => {
       </View>
       <TouchableOpacity style={styles.homeBtn} onPress={() => navigation.navigate('Home')}> 
         <Text style={styles.homeBtnText}>Back to Homepage</Text>
+        <Text>Back to login</Text>
       </TouchableOpacity>
     </View>
   );

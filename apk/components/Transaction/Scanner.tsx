@@ -41,7 +41,7 @@ export default function Scanner({ navigation }) {
         scannedData: data
       });
     }else{
-      Alert.alert('Invalid QR Code', 'Please scan a valid QR Code to proceed , wrong qr code not supported');
+      Alert.alert('Invalid QR Code', 'Please scan a valid QR Code to proceed');
       setScanned(false);
     }
   }
