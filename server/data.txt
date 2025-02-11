@@ -4,3 +4,4 @@ ACID property queue removed
 Home page theme changed
 Send Money botton style changed
 Profile Section Api created
+Profile Page api integration
