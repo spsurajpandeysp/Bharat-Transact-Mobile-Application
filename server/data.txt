@@ -2,3 +2,4 @@ Apl route changed
 Phone Number added in forgetpass
 ACID property queue removed
 Home page theme changed
+Send Money botton style changed
