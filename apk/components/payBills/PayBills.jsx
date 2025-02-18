@@ -105,6 +105,12 @@ const PayBills = ({ navigation }) => {
             </View>
             <Text style={styles.quickActionText}>Bills</Text>
           </TouchableOpacity>
+          <TouchableOpacity style={styles.quickAction}>
+            <View style={[styles.quickActionIcon, { backgroundColor: '#FFC10715' }]}>
+              <MaterialIcons name="receipt" size={24} color="#FFC107" />
+            </View>
+            <Text style={styles.quickActionText}>Bills</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Recent Bills */}
