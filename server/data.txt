@@ -1,2 +1,3 @@
 Apl route changed
 Phone Number added in forgetpass
+ACID property queue removed
