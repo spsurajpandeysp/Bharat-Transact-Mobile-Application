@@ -3,10 +3,7 @@
   "builds": [
     {
       "src": "server.js",
-      "use": "@vercel/node",
-      "config": {
-        "maxDuration": 30
-      }
+      "use": "@vercel/node"
     }
   ],
   "routes": [
@@ -16,11 +13,8 @@
     }
   ],
   "functions": {
-    "api/**/*.js": {
+    "api/api/**/*.js": {
       "maxDuration": 30
     }
-  },
-  "env": {
-    "NODE_VERSION": "18.x"
   }
 }
