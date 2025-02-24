@@ -15,6 +15,11 @@
       "dest": "server.js"
     }
   ],
+  "functions": {
+    "api/**/*.js": {
+      "maxDuration": 60
+    }
+  },
   "env": {
     "NODE_VERSION": "18.x"
   }
