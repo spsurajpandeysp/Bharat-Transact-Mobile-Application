@@ -4,6 +4,7 @@ import FontAwesome from "react-native-vector-icons/FontAwesome";
 import axios from "axios";
 import { url_api } from '../../impUrl';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AntDesign } from '@expo/vector-icons';
 
 const { width, height } = Dimensions.get("window");
 
@@ -13,7 +14,7 @@ export default function Login({ navigation }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const [isPasswordVisible,setPasswordVisible]=useState(false);
   const handleLogin = () => {
     if (loading) return; 
 
@@ -55,13 +56,15 @@ export default function Login({ navigation }) {
   const handleCreateAccount = () => {
     navigation.navigate("SignUp"); 
   };
-
+  const togglePasswordVisibility=()=>{
+    setPasswordVisible(prevState=>!prevState);
+  };
   return (
     <>
-    <ImageBackground 
-      source={require('./bgc.jpg')}  
-      style={styles.container}
-    >
+      <ImageBackground 
+        source={require('./bgc.jpg')}  
+        style={styles.container}
+      >
       <Text style={styles.headingText}>Login Here</Text> 
       <View style={styles.content}>
         <Text style={styles.contentText}>Welcome Back</Text>
@@ -80,11 +83,21 @@ export default function Login({ navigation }) {
           <FontAwesome name={"lock"} size={24} color={"#000"} style={styles.inputIcon} />
           <TextInput 
             placeholder="Password" 
-            secureTextEntry 
+            secureTextEntry={!isPasswordVisible}
             style={styles.textInput} 
             value={password} 
             onChangeText={(text) => setPassword(text.toLowerCase())} 
           />
+           <TouchableOpacity 
+            style={styles.eyeIcon} 
+            onPress={togglePasswordVisibility}
+          >
+            <AntDesign 
+              name={isPasswordVisible ? "eyeo" : "eye"} 
+              size={20} 
+              color="black"
+            />
+          </TouchableOpacity>
         </View>
       </View>
       <View style={styles.forgotPasswordContainer}>
@@ -129,7 +142,7 @@ const styles = StyleSheet.create({
   },
   headingText: {
     color: "#1F41B1",  
-    fontSize: height * 0.06,  
+    fontSize: height * 0.08,  
     fontWeight: "900", 
   },
   content: {
@@ -140,7 +153,7 @@ const styles = StyleSheet.create({
     fontWeight: "900",
   },
   inputs: {
-    paddingTop: height * 0.1, 
+    paddingTop: height * 0.08, 
     width: "80%", 
   },
   emailContainer: {
