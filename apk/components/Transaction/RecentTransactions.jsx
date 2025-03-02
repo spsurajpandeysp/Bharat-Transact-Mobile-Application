@@ -25,8 +25,6 @@ const RecentTransactions = ({ navigation }) => {
             Authorization: `Bearer ${token}`,
           },
         });
-
-        // Reverse the transaction array to show the latest transaction first
         const reversedTransactions = response.data.transactions.reverse();
         setTransactions(reversedTransactions || []);
       } catch (error) {
