@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // To store/retrieve the token locally
+import AsyncStorage from "@react-native-async-storage/async-storage"; 
 import { url_api } from '../../impUrl';
 
 const url = url_api;
@@ -12,21 +12,20 @@ const CheckBalance = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch user balance using JWT token
   const fetchBalance = async () => {
     try {
-      const token = await AsyncStorage.getItem("jwt_token"); // Retrieve token from storage
+      const token = await AsyncStorage.getItem("jwt_token"); 
       if (!token) {
         throw new Error("JWT token not found. Please login.");
       }
 
       const response = await axios.get(`${url}/api/user/balance`, {
         headers: {
-          Authorization: `Bearer ${token}`, // Add the token to the Authorization header
+          Authorization: `Bearer ${token}`, 
         },
       });
 
-      // Assuming the API returns `balance` and `userName`
+    
       setBalance(response.data.balance);
       setUserName(response.data.userName);
     } catch (err) {

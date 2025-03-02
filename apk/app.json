@@ -1,16 +1,16 @@
 {
   "expo": {
-    "name": "bharat-transact",
+    "name": "Bharat-Transact",
     "slug": "snack-7aa2ec8b-e257-45e6-af76-e69389258f9a",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/newIcon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#1F41B1"
     },
     "ios": {
       "supportsTablet": true

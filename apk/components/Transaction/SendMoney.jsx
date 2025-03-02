@@ -1,15 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
-  Alert,
-  ActivityIndicator,
-  ImageBackground,
-  Dimensions,
-} from "react-native";
+import {View,Text,TextInput,StyleSheet,TouchableOpacity,Alert,ActivityIndicator,ImageBackground,Dimensions} from "react-native";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
@@ -21,23 +11,21 @@ const { url_api } = require("../../impUrl");
 const url = url_api;
 const { width, height } = Dimensions.get("window");
 
-// Logout function
-const logout = async () => {
-  try {
-    await AsyncStorage.removeItem("jwt_token");
-    navigation.replace("OpenAppLoading");
-  } catch (error) {
-    Alert.alert("An Error Occurred While logging out. Please Try Again Later");
-  }
-};
-
 const SendMoney = ({ navigation }) => {
+  const logout = async () => {
+    try {
+      await AsyncStorage.removeItem("jwt_token");
+      navigation.replace("OpenAppLoading");
+    } catch (error) {
+      Alert.alert("An Error Occurred While logging out. Please Try Again Later");
+    }
+  };
   const [amount, setAmount] = useState("");
   const [recipient, setRecipient] = useState("");
   const [jwtToken, setJwtToken] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Retrieve JWT from AsyncStorage when the component mounts
+
   useEffect(() => {
     const fetchToken = async () => {
       try {
@@ -56,7 +44,6 @@ const SendMoney = ({ navigation }) => {
     fetchToken();
   }, []);
 
-  // Handle send money request
   const handleSendMoney = () => {
     if (!amount || !recipient) {
       Alert.alert("Error", "Please enter both recipient and amount.");
@@ -69,7 +56,7 @@ const SendMoney = ({ navigation }) => {
       return;
     }
 
-    setLoading(true); // Show loader
+    setLoading(true); 
     axios
       .post(
         `${url}/api/transaction/send-money`,
