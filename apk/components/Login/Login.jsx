@@ -65,7 +65,7 @@ export default function Login({ navigation }) {
         source={require('./bgc.jpg')}  
         style={styles.container}
       >
-      <Text style={styles.headingText}>Login hhhh</Text> 
+      <Text style={styles.headingText}>Login Here</Text> 
       <View style={styles.content}>
         <Text style={styles.contentText}>Welcome Back</Text>
       </View>
