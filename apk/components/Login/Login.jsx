@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
   },
   headingText: {
     color: "#1F41B1",  
-    fontSize: height * 0.08,  
+    fontSize: height * 0.06,  
     fontWeight: "900", 
   },
   content: {
