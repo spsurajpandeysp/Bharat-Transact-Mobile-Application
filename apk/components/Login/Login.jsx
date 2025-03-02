@@ -67,7 +67,7 @@ export default function Login({ navigation }) {
       >
       <Text style={styles.headingText}>Login Here</Text> 
       <View style={styles.content}>
-        <Text style={styles.contentText}>Welcome Back</Text>
+        <Text style={styles.contentText}>Welcome Back!!!!</Text>
       </View>
       <View style={styles.inputs}>
         <View style={styles.emailContainer}>
