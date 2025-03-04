@@ -12,6 +12,7 @@ import SendMoney from '../Transaction/SendMoney';
 import CheckBalance from '../Transaction/checkBalance';
 import RecentTransactions from '../Transaction/RecentTransactions'
 import ForgetPasswordVerifyOtp from '../ForgotPassword/ForgotPasswordVerifyOtp'
+import Scanner from '../Transaction/Scanner';
 const Stack = createStackNavigator();
 
 export default function App() {
@@ -28,6 +29,7 @@ export default function App() {
         <Stack.Screen name="CheckBalance" component={CheckBalance} options={{headerShown: false}} />
         <Stack.Screen name="RecentTransaction" component={RecentTransactions} options={{headerShown: false}} />
         <Stack.Screen name="ForgetPasswordVerifyOtp" component={ForgetPasswordVerifyOtp} options={{headerShown: false}} />
+        <Stack.Screen name="Scanner" component={Scanner} options={{headerShown: false}} />
 
       </Stack.Navigator>
     </NavigationContainer>
