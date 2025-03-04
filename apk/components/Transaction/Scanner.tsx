@@ -118,11 +118,11 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     backgroundColor: '#1f41b1',
     borderRadius: 5,
-    width: width * 0.7, // Set a fixed width (70% of the screen width)
+    width: width * 0.7, 
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: height * 0.04,
-    alignSelf: 'center', // Ensure the button is centered horizontally
+    alignSelf: 'center', 
   },
   permissionButtonText: {
     fontSize: 15,
