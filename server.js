@@ -37,7 +37,7 @@ app.use((req, res, next) => {
 });
 app.use(bodyParser.json())
 
-app.get('/',(req,res)=>{
+app.get('*',(req,res)=>{
   res.send('Welcome to brarat transact')
 })
 app.use('/auth/api/',authRounter);

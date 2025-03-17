@@ -4,13 +4,15 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "echo 'No build step required' ",
+    "start": "node index.js",
     "dev": "nodemon server.js"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "engines": {
-    "node": "18.x"
+    "node": ">=18.x"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
