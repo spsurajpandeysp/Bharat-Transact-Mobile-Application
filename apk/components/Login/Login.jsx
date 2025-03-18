@@ -5,7 +5,7 @@ import axios from "axios";
 import { url_api } from '../../impUrl';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AntDesign } from '@expo/vector-icons';
-
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 const { width, height } = Dimensions.get("window");
 
 const url = url_api;
@@ -21,6 +21,14 @@ export default function Login({ navigation }) {
     if (!email || !password) {
       Alert.alert("Error", "Please fill in both email and password!");
       return;
+    }
+    const emailRegex= /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com/;
+    if(!emailRegex.test(email)){
+      Alert.alert("Error","Please Enter Valid Email")
+    }
+    const passwordRegex=/^(?=.*[!@#$%^&*()_+={}\[\]:;"'<>,.?/-])(?=.*\d).{7}$/
+    if(!passwordRegex.test(password)){
+      Alert.alert("Error","Password must be 7 characters long, contain at least one special character and number");
     }
 
     setLoading(true); 
@@ -60,7 +68,6 @@ export default function Login({ navigation }) {
     setPasswordVisible(prevState=>!prevState);
   };
   return (
-    <>
       <ImageBackground 
         source={require('./bgc.jpg')}  
         style={styles.container}
@@ -69,7 +76,14 @@ export default function Login({ navigation }) {
       <View style={styles.content}>
         <Text style={styles.contentText}>Welcome Back</Text>
       </View>
-      <View style={styles.inputs}>
+
+      <KeyboardAwareScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ flexGrow: 1}}
+        keyboardShouldPersistTaps="handled"
+      >
+    
+        <View style={styles.inputs}>
         <View style={styles.emailContainer}>
           <FontAwesome name={"envelope"} size={24} color={"#000"} style={styles.inputIcon} />
           <TextInput 
@@ -87,16 +101,15 @@ export default function Login({ navigation }) {
             style={styles.textInput} 
             value={password} 
             onChangeText={(text) => setPassword(text.toLowerCase())} 
-          />
+            />
            <TouchableOpacity 
-            style={styles.eyeIcon} 
             onPress={togglePasswordVisibility}
-          >
+            >
             <AntDesign 
               name={isPasswordVisible ? "eyeo" : "eye"} 
               size={20} 
               color="black"
-            />
+              />
           </TouchableOpacity>
         </View>
       </View>
@@ -127,9 +140,9 @@ export default function Login({ navigation }) {
       </View>
       <View style={styles.CreateContainer}>
                 <Text style={styles.CreateContainerText} onPress={handleCreateAccount}> Create New Account </Text>
-            </View>
+      </View>
+      </KeyboardAwareScrollView>
     </ImageBackground>
-    </>
   );
 }
 

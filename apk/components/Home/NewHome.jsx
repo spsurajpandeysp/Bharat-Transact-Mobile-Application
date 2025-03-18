@@ -32,7 +32,7 @@ export default function NewHome({ navigation }) {
         <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate("SendMoney")}>
           <MaterialIcons name="send-to-mobile" size={24} color="white" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.footerButton}>
+        <TouchableOpacity onPress={() => navigation.navigate("Scanner")} style={styles.footerButton}>
           <MaterialCommunityIcons name="qrcode-scan" size={24} color="white" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.footerButton} onPress={logout}>

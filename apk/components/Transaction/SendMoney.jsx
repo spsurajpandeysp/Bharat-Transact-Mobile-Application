@@ -82,6 +82,9 @@ const SendMoney = ({ navigation }) => {
 
   return (
     <ImageBackground source={require("./bgc.jpg")} style={styles.container}>
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+              <FontAwesome name="arrow-left" size={30} color="#1F41B1" />
+      </TouchableOpacity>
       <Text style={styles.headingText}>Send Money</Text>
       <View style={styles.inputs}>
         <View style={styles.RecipientContainer}>
@@ -141,7 +144,7 @@ const SendMoney = ({ navigation }) => {
         >
           <MaterialIcons name="send-to-mobile" size={24} color="white" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.footerButton}>
+        <TouchableOpacity  onPress={() => navigation.navigate("Scanner")} style={styles.footerButton}>
           <MaterialCommunityIcons name="qrcode-scan" size={24} color="white" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.footerButton} onPress={logout}>
@@ -159,7 +162,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-start",
     alignItems: "center",
-    paddingTop: height * 0.15,
+    paddingTop: height * 0.17,
   },
   headingText: {
     color: "#1F41B1",
@@ -223,7 +226,6 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "700",
   },
-
   footer: {
     position: "absolute",
     bottom: 0,
@@ -236,5 +238,11 @@ const styles = StyleSheet.create({
   },
   footerButton: {
     alignItems: "center",
+  },
+  backButton: {
+    position: 'absolute',
+    top: height * 0.09,
+    left: 20,
+    zIndex: 1,
   },
 });

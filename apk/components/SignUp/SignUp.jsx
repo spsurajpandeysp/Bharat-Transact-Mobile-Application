@@ -19,7 +19,14 @@ const New = ({ navigation }) => {
       Alert.alert("Error", "Please fill all the fields!");
       return;
     }
-
+    const emailRegex= /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com/;
+        if(!emailRegex.test(email)){
+          Alert.alert("Error","Please Enter Valid Email")
+        }
+        const passwordRegex=/^(?=.*[!@#$%^&*()_+={}\[\]:;"'<>,.?/-])(?=.*\d).{7}$/
+        if(!passwordRegex.test(password)){
+          Alert.alert("Error","Password must be 7 characters long, contain at least one special character and number");
+        }
     if (password !== confirmPassword) {
       Alert.alert("Error", "Passwords do not match!");
       return;
