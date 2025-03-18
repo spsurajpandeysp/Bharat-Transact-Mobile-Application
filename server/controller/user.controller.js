@@ -91,8 +91,9 @@ const getUserDetailsByUserId = async(req,res)=>{
 
 
 const getUserDetailsByEmail = async(req,res) =>{
-  console.log(req)
-  const { email } = req.params;
+
+  const { email } =  req.body;
+
 
   try {
 
@@ -104,6 +105,9 @@ const getUserDetailsByEmail = async(req,res) =>{
     const userDetails = {
       firstName: user.firstName,
       lastName: user.lastName,
+      qrCode:user.qrCode,
+      balance:user.balance,
+
       profilePic: user.profilePic, 
       address: user.address
     };
@@ -113,6 +117,40 @@ const getUserDetailsByEmail = async(req,res) =>{
     res.status(500).json({ message: 'Error fetching user details.', error: error.message });
   }
 }
+
+const getUserByJWT = async(req,res) =>{
+
+  const { userId } =  req.user;
+
+
+  try {
+
+
+    if (!userId) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+
+    const userDetails = {
+      firstName: user.firstName,
+      lastName: user.lastName,
+      qrCode:user.qrCode,
+      balance:user.balance,
+
+      profilePic: user.profilePic, 
+      address: user.address
+    };
+
+    res.status(200).json({ message: 'User details fetched successfully!', userDetails });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching user details.', error: error.message });
+  }
+}
+
 const getBalance = async (req, res) => {
   const {userId} = req.user
   console.log(userId)
@@ -136,4 +174,4 @@ const getBalance = async (req, res) => {
 };
 
 
-module.exports = {helpUser,updateUserDetails,getBalance};
+module.exports = {helpUser,updateUserDetails,getBalance,getUserDetailsByEmail,getUserByJWT};

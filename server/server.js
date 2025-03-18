@@ -37,9 +37,9 @@ app.use((req, res, next) => {
 });
 app.use(bodyParser.json())
 
-app.get('*',(req,res)=>{
-  res.send('Welcome to brarat transact')
-})
+// app.get('*',(req,res)=>{
+//   res.send('Welcome to brarat transact')
+// })
 app.use('/auth/api/',authRounter);
 app.use('/api/transaction/',transactionRouter);
 app.use('/api/money-request/',moneyRequestRounter);
