@@ -40,10 +40,10 @@ const RecentTransactions = ({ navigation }) => {
   const renderTransaction = ({ item }) => (
     <View style={styles.transactionItem}>
       <Text style={styles.transactionText}>
+        {" "}Received ₹{item.amount} From  
         <Text style={styles.bold}>
           {item.toUser.firstName} {item.toUser.lastName}
         </Text>
-        {" "}received ₹{item.amount}
       </Text>
       <Text style={styles.transactionDate}>Transaction ID: {item.transactionId}</Text>
     </View>

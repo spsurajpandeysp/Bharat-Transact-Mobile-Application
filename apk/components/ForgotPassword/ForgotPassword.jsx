@@ -15,7 +15,6 @@ export default function ForgotPassword({ navigation }) {
       Alert.alert("Error", "Please enter an email address");
       return;
     }
-
     setLoading(true);
 
     try {
