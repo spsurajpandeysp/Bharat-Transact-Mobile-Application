@@ -38,7 +38,7 @@ app.use((req, res, next) => {
 app.use(bodyParser.json())
 
 app.get('/',(req,res)=>{
-  res.send('Welcome to brarat transact')
+  res.send('Welcome to bharat transact')
 })
 app.use('/auth/api/',authRounter);
 app.use('/api/transaction/',transactionRouter);
