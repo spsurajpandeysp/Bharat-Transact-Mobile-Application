@@ -96,30 +96,6 @@ const EnterAmount = ({ route, navigation }) => {
       <View>
         <Text>Home</Text>
       </View>
-      <View>
-        <Text>Exit</Text>
-      </View>
-      <View>
-        <Text>Home</Text>
-      </View>
-      <View>
-        <Text>Exit</Text>
-      </View>
-      <View>
-        <Text>Home</Text>
-      </View>
-      <View>
-        <Text>Exit</Text>
-      </View>
-      <View>
-        <Text>Home</Text>
-      </View>
-      <View>
-        <Text>Exit</Text>
-      </View>
-      <View>
-        <Text>Home</Text>
-      </View>
     </KeyboardAvoidingView>
   );
 };
