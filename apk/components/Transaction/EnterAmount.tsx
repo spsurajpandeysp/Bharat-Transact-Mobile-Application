@@ -90,12 +90,6 @@ const EnterAmount = ({ route, navigation }) => {
       >
         <Text style={styles.continueButtonText}>Continue</Text>
       </TouchableOpacity>
-      <View>
-        <Text>Exit</Text>
-      </View>
-      <View>
-        <Text>Home</Text>
-      </View>
     </KeyboardAvoidingView>
   );
 };
