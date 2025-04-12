@@ -90,6 +90,27 @@ const EnterAmount = ({ route, navigation }) => {
       >
         <Text style={styles.continueButtonText}>Continue</Text>
       </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.continueButton, !amount && styles.continueButtonDisabled]}
+        onPress={handleContinue}
+        disabled={!amount}
+      >
+        <Text style={styles.continueButtonText}>Continue</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.continueButton, !amount && styles.continueButtonDisabled]}
+        onPress={handleContinue}
+        disabled={!amount}
+      >
+        <Text style={styles.continueButtonText}>Continue</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.continueButton, !amount && styles.continueButtonDisabled]}
+        onPress={handleContinue}
+        disabled={!amount}
+      >
+        <Text style={styles.continueButtonText}>Continue</Text>
+      </TouchableOpacity>
     </KeyboardAvoidingView>
   );
 };
