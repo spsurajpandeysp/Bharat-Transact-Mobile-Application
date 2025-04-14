@@ -22,6 +22,7 @@ export default function Mpin({ navigation, route }) {
         try {
             const token = await AsyncStorage.getItem('jwt_token');
             console.log("token", token);
+            console.log("gkjfhkj kfj kfbskh kfbfskhs kfjsbfks kvbfk")
             console.log(route.params.recipient, route.params.amount, mpin);
 
             let data;
