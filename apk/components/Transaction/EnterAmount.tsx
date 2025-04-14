@@ -95,21 +95,7 @@ const EnterAmount = ({ route, navigation }) => {
         onPress={handleContinue}
         disabled={!amount}
       >
-        <Text style={styles.continueButtonText}>Continue</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[styles.continueButton, !amount && styles.continueButtonDisabled]}
-        onPress={handleContinue}
-        disabled={!amount}
-      >
-        <Text style={styles.continueButtonText}>Continue</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[styles.continueButton, !amount && styles.continueButtonDisabled]}
-        onPress={handleContinue}
-        disabled={!amount}
-      >
-        <Text style={styles.continueButtonText}>Continue</Text>
+        <Text style={styles.continueButtonText}>Continue to check the amount</Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>
   );
