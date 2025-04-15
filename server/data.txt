@@ -10,3 +10,4 @@ Ui improvement of profile
 Package.json updated
 routes changed
 .env updated
+logout jwt removed
