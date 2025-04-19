@@ -106,7 +106,7 @@ export default function MpinCreate({ navigation }) {
           style={styles.header}
         >
           <View style={styles.placeholder} />
-          <Text style={styles.headerText}>Create MPIN</Text>
+          <Text style={styles.headerText}>Create MPIN for the new user</Text>
           <View style={styles.placeholder} />
         </LinearGradient>
 

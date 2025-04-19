@@ -22,7 +22,6 @@ export default function Mpin({ navigation, route }) {
         try {
             const token = await AsyncStorage.getItem('jwt_token');
             console.log("token", token);
-            console.log("gkjfhkj kfj kfbskh kfbfskhs kfjsbfks kvbfk")
             console.log(route.params.recipient, route.params.amount, mpin);
 
             let data;
@@ -93,7 +92,7 @@ export default function Mpin({ navigation, route }) {
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                     <FontAwesome name="arrow-left" size={20} color="#fff" />
                 </TouchableOpacity>
-                <Text style={styles.headerText}>Enter MPIN</Text>
+                <Text style={styles.headerText}>Enter MPIN to check that you can proceed to the payment or not </Text>
                 <View style={styles.placeholder} />
             </LinearGradient>
 
