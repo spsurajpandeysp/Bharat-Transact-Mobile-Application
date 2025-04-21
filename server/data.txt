@@ -12,3 +12,4 @@ routes changed
 .env updated
 qr code added
 resend api error solved
+forgetpass route added
