@@ -92,7 +92,7 @@ export default function Mpin({ navigation, route }) {
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                     <FontAwesome name="arrow-left" size={20} color="#fff" />
                 </TouchableOpacity>
-                <Text style={styles.headerText}>Enter MPIN to check that you can proceed to the payment or not </Text>
+                <Text style={styles.headerText}>Enter MPIN</Text>
                 <View style={styles.placeholder} />
             </LinearGradient>
 
