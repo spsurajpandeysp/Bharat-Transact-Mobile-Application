@@ -260,7 +260,7 @@ const searchUsersByPhone = async(req, res) => {
       }))
     });
   } catch (error) {
-    res.status(500).json({ message: "Error searching users. to ffdb ougdfbg fglfdng glogb", error: error.message });
+    res.status(500).json({ message: "Error searching users.", error: error.message });
   }
 };
 module.exports = {helpUser,updateUserDetails,getBalance,getUserDetailsByEmail,getUserByJWT,getUserDetailsByQrCode,getUserDetailsByPhoneNumber,searchUsersByPhone};
