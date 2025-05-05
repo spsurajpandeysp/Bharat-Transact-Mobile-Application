@@ -72,6 +72,14 @@ export default function UserDetails({ navigation }) {
             <Text style={styles.value}>₹ {user?.balance ?? 'N/A'}</Text>
           </View>
         </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.label}>Bank Name</Text>
+            <Text style={styles.value}>₹ {user?.balance ?? 'N/A'}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.label}>Ifsc Code</Text>
+            <Text style={styles.value}>₹ {user?.balance ?? 'N/A'}</Text>
+          </View>
       </ScrollView>
     </View>
   );

@@ -163,7 +163,7 @@ const RecentTransactions = ({ navigation }) => {
         ]}>
           {item.prefix}₹{item.amount}
         </Text>
-        <MaterialIcons name="chevron-right" size={20} color="#999" />
+        {/* <MaterialIcons name="chevron-right" size={20} color="#999" /> */}
       </View>
     </View>
   );
