@@ -13,7 +13,13 @@ import RecentTransactions from '../Transaction/RecentTransactions'
 import ForgetPasswordVerifyOtp from '../ForgotPassword/ForgotPasswordVerifyOtp'
 import Scanner from '../Transaction/Scanner';
 import Sidebar from '../Sidebar/sidebar';
-
+import ScannedSendMoney from '../Transaction/ScannedSendMoney';
+import Mpin from '../Transaction/Mpin';
+import TransactionSuccessfull from '../Transaction/TransactionSuccessfull';
+import BankTransfer from '../bankTransfer/BankTransfer';
+import PayBills from '../payBills/PayBills';
+import BillPaymentForm from '../payBills/BillPaymentForm';
+import Support from '../support/Support';
 const Stack = createStackNavigator();
 
 export default function Navigation() {
@@ -31,6 +37,14 @@ export default function Navigation() {
       <Stack.Screen name="ForgetPasswordVerifyOtp" component={ForgetPasswordVerifyOtp} options={{headerShown: false}} />
       <Stack.Screen name="Scanner" component={Scanner} options={{headerShown: false}} />
       <Stack.Screen name="Sidebar" component={Sidebar} options={{headerShown: false}} />
+      <Stack.Screen name="ScannedSendMoney" component={ScannedSendMoney} options={{headerShown: false}} />
+      <Stack.Screen name="Mpin" component={Mpin} options={{headerShown: false}} />
+      <Stack.Screen name="TransactionSuccessfull" component={TransactionSuccessfull} options={{headerShown: false}} />
+      <Stack.Screen name="BankTransfer" component={BankTransfer} options={{headerShown: false}} />
+      <Stack.Screen name="PayBills" component={PayBills} options={{headerShown: false}} />
+      <Stack.Screen name='BillPaymentForm' component={BillPaymentForm} options={{headerShown:false}}/>
+      <Stack.Screen name='Support' component={Support} options={{headerShown:false}}/>
+      
     </Stack.Navigator>
   );
 }

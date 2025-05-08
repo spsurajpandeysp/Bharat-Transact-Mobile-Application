@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, ImageBackground, Dimensions, TouchableOpacity, TextInput, Alert, ActivityIndicator } from 'react-native';
-import FontAwesome from "react-native-vector-icons/FontAwesome";
+import { StyleSheet, Text, View, Dimensions, TouchableOpacity, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { OtpInput } from "react-native-otp-entry";
 import axios from 'axios';
 import { url_api } from '../../impUrl';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { AntDesign } from '@expo/vector-icons';
-
+import { FontAwesome } from '@expo/vector-icons';
 const { width, height } = Dimensions.get("window");
 const url = url_api;
 
@@ -24,7 +21,6 @@ export default function FpVo({ navigation, route }) {
       Alert.alert("Error", "All fields are required.");
       return;
     }
-    
     if (password !== confirmPassword) {
       Alert.alert("Error", "Passwords do not match.");
       return;
@@ -37,7 +33,6 @@ export default function FpVo({ navigation, route }) {
         newPassword: password,
         confirmNewPassword: confirmPassword,
       });
-
       if (response.status === 200) {
         Alert.alert("Success", response.data.message || "Password reset successfully!");
         navigation.navigate("Login");
@@ -48,12 +43,10 @@ export default function FpVo({ navigation, route }) {
       setLoading(false);
     }
   };
-
   const handleResendCode = async () => {
     setResending(true);
     try {
       const response = await axios.post(`${url}/auth/api/forget-password`, { email });
-      
       if (response.status === 200) {
         Alert.alert("Success", response.data.message || "OTP resent successfully!");
       }
@@ -70,227 +63,209 @@ export default function FpVo({ navigation, route }) {
     setCPasswordVisible(prevState=>!prevState);
   };
   return (
-    <ImageBackground source={require('./bgc.jpg')} style={styles.container}>
-      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-        <FontAwesome name="arrow-left" size={30} color="#1F41B1" />
+    <View style={styles.container}>
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <FontAwesome name="arrow-left" size={26} color="#1F41B1" />
       </TouchableOpacity>
-
-      <Text style={styles.headingText}>Check your email</Text>
-      <View style={styles.content}>
-        <Text style={styles.contentText}>
-          We sent a reset link to your {email}. Enter the 4-digit code mentioned in the email.
-        </Text>
-      </View>
-
-      <KeyboardAwareScrollView style={{flex:1}}
-        contentContainerStyle={{flexGrow:1}}
-        keyboardShouldPersistTaps="handled"
-      >
-      <OtpInput
-        numberOfDigits={4}
-        focusColor="blue"
-        autoFocus={false}
-        hideStick={true}
-        placeholder="*"
-        blurOnFilled={true}
-        disabled={false}
-        type="numeric"
-        secureTextEntry={false}
-        focusStickBlinkingDuration={500}
-        onTextChange={setOtp}
-        onFilled={(text) => console.log(`OTP entered: ${text}`)}
-        textInputProps={{
-          accessibilityLabel: "One-Time Password",
-        }}
-        theme={{
-          containerStyle: styles.otpContainer,
-          pinCodeContainerStyle: styles.pinCodeContainer,
-          pinCodeTextStyle: styles.pinCodeText,
-          focusStickStyle: styles.focusStick,
-          focusedPinCodeContainerStyle: styles.activePinCodeContainer,
-          placeholderTextStyle: styles.placeholderText,
-          filledPinCodeContainerStyle: styles.filledPinCodeContainer,
-          disabledPinCodeContainerStyle: styles.disabledPinCodeContainer,
-        }}
-      />
-      <View style={styles.passwordContainer}>
-        <FontAwesome name="lock" size={24} coloer="black" style={styles.inputIcon}/>
-      <TextInput
-        style={styles.textInput}
-        placeholder="New Password"
-        secureTextEntry={!isPasswordVisible}
-        value={password}
-        onChangeText={setPassword}
-      />
-      <TouchableOpacity 
-            onPress={togglePasswordVisibility}
-            >
-            <AntDesign 
-              name={isPasswordVisible ? "eyeo" : "eye"} 
-              size={20} 
-              color="black"
-              />
-      </TouchableOpacity>
-      </View>
-      <View style={styles.confirmPasswordContainer}>
-        <FontAwesome name="lock" size={24} color="black" style={styles.inputIcon}/>
-        <TextInput
-          style={styles.textInput}
-          placeholder="Confirm New Password"
-          secureTextEntry={!isCPasswordVisible}
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
+      <View style={styles.card}>
+        <Text style={styles.headingText}>Check your email</Text>
+        <Text style={styles.subtitle}>We sent a reset link to your {email}. Enter the 4-digit code mentioned in the email.</Text>
+        <OtpInput
+          numberOfDigits={4}
+          focusColor="#1F41B1"
+          autoFocus={false}
+          hideStick={true}
+          placeholder="*"
+          blurOnFilled={true}
+          disabled={false}
+          type="numeric"
+          secureTextEntry={false}
+          focusStickBlinkingDuration={500}
+          onTextChange={setOtp}
+          textInputProps={{
+            accessibilityLabel: "One-Time Password",
+          }}
+          theme={{
+            containerStyle: styles.otpContainer,
+            pinCodeContainerStyle: styles.otpBox,
+            pinCodeTextStyle: styles.otpDigit,
+            focusStickStyle: styles.focusStick,
+            focusedPinCodeContainerStyle: styles.otpBoxActive,
+            placeholderTextStyle: styles.placeholderText,
+            filledPinCodeContainerStyle: styles.otpBoxFilled,
+            disabledPinCodeContainerStyle: styles.otpBoxDisabled,
+          }}
         />
-        <TouchableOpacity onPress={toggleCPasswordVisibility}>
-              <AntDesign 
-                name={isCPasswordVisible ? "eyeo" : "eye"} 
-                size={20} 
-                color="black"
-                />
-        </TouchableOpacity>
+        <View style={styles.inputRow}>
+          <TextInput
+            style={styles.textInput}
+            placeholder="New Password"
+            secureTextEntry={!isPasswordVisible}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon}>
+            <FontAwesome name={isPasswordVisible ? 'eye' : 'eye-slash'} size={20} color="#888" />
+          </TouchableOpacity>
         </View>
-      <TouchableOpacity onPress={handleSubmit}>
-        <View style={styles.verifyBtn}>
-          <Text style={styles.verifyBtnText}>
-            {loading ? <ActivityIndicator size="small" color="white" /> : "Verify Code"}
-          </Text>
+        <View style={styles.inputRow}>
+          <TextInput
+            style={styles.textInput}
+            placeholder="Confirm New Password"
+            secureTextEntry={!isCPasswordVisible}
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+          />
+          <TouchableOpacity onPress={toggleCPasswordVisibility} style={styles.eyeIcon}>
+            <FontAwesome name={isCPasswordVisible ? 'eye' : 'eye-slash'} size={20} color="#888" />
+          </TouchableOpacity>
         </View>
-      </TouchableOpacity>
-      <View style={styles.reSendContainer}>
-        <Text style={styles.resend}>Haven't got the email yet? </Text>
-        <TouchableOpacity onPress={handleResendCode} disabled={resending}>
-          <Text style={styles.resendText}>
-            {resending ? "Resending..." : "Resend Email"}
-          </Text>
+        <TouchableOpacity onPress={handleSubmit} style={styles.verifyBtn} disabled={loading}>
+          {loading ? (
+            <ActivityIndicator size="small" color="white" />
+          ) : (
+            <Text style={styles.verifyBtnText}>Verify Code</Text>
+          )}
         </TouchableOpacity>
+        <View style={styles.reSendContainer}>
+          <Text style={styles.resend}>Haven't got the email yet? </Text>
+          <TouchableOpacity onPress={handleResendCode} disabled={resending}>
+            <Text style={styles.resendText}>{resending ? "Resending..." : "Resend Email"}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-      </KeyboardAwareScrollView>
-    </ImageBackground>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "flex-start",
-    alignItems: "center",
-    paddingTop: height * 0.18,
+    backgroundColor: '#1F41B1',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   backButton: {
     position: 'absolute',
-    top: height * 0.09,
+    top: 40,
     left: 20,
-    zIndex: 1,
+    zIndex: 10,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 6,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+  },
+  card: {
+    width: '90%',
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 8,
   },
   headingText: {
-    color: "#1F41B1",
-    fontSize: height * 0.08,
-    fontWeight: "900",
+    color: '#1F41B1',
+    fontSize: 26,
+    fontWeight: '800',
+    alignSelf: 'flex-start',
+    marginBottom: 4,
   },
-  content: {
-    paddingTop: 20,
-    alignItems: 'center',
-  },
-  contentText: {
-    fontSize: height * 0.02,
-    fontWeight: "800",
-    width: width * 0.7,
-    textAlign: 'center',
+  subtitle: {
+    fontSize: 15,
+    color: '#888',
+    alignSelf: 'flex-start',
+    marginBottom: 18,
   },
   otpContainer: {
-    paddingTop: height * 0.04,
-    width: width * 0.8,
-    justifyContent: 'space-evenly',
-    alignItems: 'center',
-  },
-  pinCodeContainer: {
-    width: width * 0.13,
-    height: height * 0.06,
-    backgroundColor: '#fff',
-    borderRadius: "50%",
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
-    elevation: 5,
+    marginBottom: 18,
+    gap: 12,
   },
-  pinCodeText: {
-    fontSize: height * 0.04,
-    color: '#000',
+  otpBox: {
+    width: 48,
+    height: 56,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 6,
   },
-  focusStick: {
-    height: 4,
-    backgroundColor: 'blue',
-  },
-  activePinCodeContainer: {
-    borderColor: 'blue',
+  otpBoxActive: {
+    borderColor: '#1F41B1',
     borderWidth: 2,
   },
-  placeholderText: {
-    fontSize: height * 0.04,
-    color: '#b0b0b0',
+  otpBoxFilled: {
+    backgroundColor: '#F1F5F9',
+    borderColor: '#1F41B1',
   },
-  filledPinCodeContainer: {
-    backgroundColor: '#90CAF9',
+  otpBoxDisabled: {
+    backgroundColor: '#E5E7EB',
+    borderColor: '#E2E8F0',
   },
-  disabledPinCodeContainer: {
-    backgroundColor: '#d1d1d1',
+  otpDigit: {
+    fontSize: 24,
+    color: '#222',
+    fontWeight: '700',
   },
-  passwordContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: width * 0.8, 
-    height: height * 0.07,  
-    backgroundColor: "#BED8FE",
-    borderRadius: 10,
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 14,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
     paddingHorizontal: 10,
-    elevation: 5, 
   },
-  confirmPasswordContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: width * 0.8, 
-    height: height * 0.07,  
-    backgroundColor: "#BED8FE",
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    elevation: 5, 
-    marginTop:20,
-    marginBottom:20
-  },
-  inputIcon: {
-    marginRight: 10, 
+  eyeIcon: {
+    marginLeft: 8,
   },
   textInput: {
     flex: 1,
-    fontSize: height * 0.02,  
-    paddingVertical: 10,
+    fontSize: 16,
+    paddingVertical: 12,
+    color: '#222',
+    backgroundColor: 'transparent',
   },
   verifyBtn: {
-    backgroundColor: '#1F41BB',
-    borderRadius: 6,
-    paddingVertical: 12,
-    paddingHorizontal: 50,
-    width: width * 0.8,
-    justifyContent: 'center',
+    width: '100%',
+    backgroundColor: '#1F41B1',
+    borderRadius: 12,
+    padding: 16,
     alignItems: 'center',
+    marginTop: 8,
   },
   verifyBtnText: {
-    fontSize: height * 0.025,
     color: 'white',
-    fontWeight: "700",
+    fontSize: 18,
+    fontWeight: '700',
   },
   reSendContainer: {
-    paddingTop: height * 0.02,
+    paddingTop: 12,
     alignItems: 'center',
-    width: width * 0.8,
+    width: '100%',
   },
   resend: {
-    fontSize: height * 0.02,
+    fontSize: 15,
     color: '#000',
   },
   resendText: {
-    color: "#1F41BB",
+    color: '#1F41B1',
     fontWeight: '600',
-    fontSize: height * 0.022,
+    fontSize: 16,
+    marginTop: 2,
   },
 });

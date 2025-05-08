@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,17 +7,42 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  Platform,
+  Animated,
+  Dimensions,
 } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { url_api } from '../../impUrl';
 
+const width = Dimensions.get('window').width;
 const RecentTransactions = ({ navigation }) => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
+  const [userData, setUserData] = useState(null);
+  const [balanceAnim] = useState(new Animated.Value(1));
+  const fetchUserData = async () => {
+    try {
+      const token = await AsyncStorage.getItem('jwt_token');
+      if (!token) {
+        navigation.replace('Login');
+        return;
+      }
+      const response = await axios.get(`${url_api}/api/user/get-user-by-JWT`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.data && response.data.userDetails) {
+        setUserData(response.data.userDetails);
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
+
 
   const fetchTransactions = async () => {
     try {
@@ -27,13 +52,11 @@ const RecentTransactions = ({ navigation }) => {
         navigation.replace('Login');
         return;
       }
-
       const response = await axios.get(`${url_api}/api/transaction/user`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
       if (response.data && response.data.transactions) {
         const reversedTransactions = response.data.transactions.reverse();
         setTransactions(reversedTransactions);
@@ -48,37 +71,103 @@ const RecentTransactions = ({ navigation }) => {
   };
 
   useEffect(() => {
+    fetchUserData();
     fetchTransactions();
   }, []);
 
   const onRefresh = () => {
     setRefreshing(true);
+    fetchUserData();
     fetchTransactions();
   };
 
+  const getTransactionIcon = (type) => {
+    switch (type) {
+      case 'credit':
+        return 'arrow-downward';
+      case 'debit':
+        return 'arrow-upward';
+      case 'bank_transfer':
+        return 'account-balance';
+      default:
+        return 'swap-horiz';
+    }
+  };
+
+  const getTransactionColor = (type) => {
+    switch (type) {
+      case 'credit':
+        return '#4CAF50';
+      case 'debit':
+        return '#F44336';
+      case 'bank_transfer':
+        return '#1F41B1';
+      default:
+        return '#1F41B1';
+    }
+  };
+
+  const getTransactionType = (type) => {
+    switch (type) {
+      case 'credit':
+        return 'Received';
+      case 'debit':
+        return 'Sent';
+      case 'bank_transfer':
+        return 'Bank Transfer';
+      default:
+        return 'Transaction';
+    }
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (date.toDateString() === today.toDateString()) {
+      return 'Today';
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return 'Yesterday';
+    } else {
+      return date.toLocaleDateString('en-US', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+    }
+  };
+
   const renderTransactionItem = ({ item }) => (
-    <TouchableOpacity style={styles.transactionItem}>
-      <View style={styles.transactionIcon}>
+    <TouchableOpacity 
+      style={styles.transactionItem}
+      onPress={() => navigation.navigate('TransactionDetails', { transaction: item })}
+    >
+      <View style={[styles.transactionIcon, { backgroundColor: `${getTransactionColor(item.type)}15` }]}>
         <MaterialIcons 
-          name={item.type === 'credit' ? 'arrow-downward' : 'arrow-upward'} 
+          name={getTransactionIcon(item.type)} 
           size={24} 
-          color={item.type === 'credit' ? '#4CAF50' : '#F44336'} 
+          color={getTransactionColor(item.type)} 
         />
       </View>
       <View style={styles.transactionDetails}>
         <Text style={styles.transactionType}>
-          {item.type === 'credit' ? 'Received' : 'Sent'}
+          {getTransactionType(item.type)}
         </Text>
         <Text style={styles.transactionDate}>
-          {new Date(item.createdAt).toLocaleDateString()}
+          {formatDate(item.createdAt)}
         </Text>
       </View>
-      <Text style={[
-        styles.transactionAmount,
-        { color: item.type === 'credit' ? '#4CAF50' : '#F44336' }
-      ]}>
-        {item.type === 'credit' ? '+' : '-'}₹{item.amount}
-      </Text>
+      <View style={styles.amountContainer}>
+        <Text style={[
+          styles.transactionAmount,
+          { color: getTransactionColor(item.type) }
+        ]}>
+          {item.type === 'credit' ? '+' : '-'}₹{item.amount}
+        </Text>
+        <MaterialIcons name="chevron-right" size={20} color="#999" />
+      </View>
     </TouchableOpacity>
   );
 
@@ -92,14 +181,42 @@ const RecentTransactions = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <MaterialIcons name="arrow-back" size={24} color="white" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Transaction History</Text>
+      <LinearGradient
+        colors={['#2563EB', '#1F41B1']}
+        style={styles.header}
+      >
+        <View style={styles.headerContent}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <MaterialIcons name="arrow-back" size={24} color="white" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Transaction History</Text>
+          <View style={styles.backButton} />
+        </View>
+      </LinearGradient>
+
+  
+  
+        <View style={styles.balanceContainer}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View>
+              <Text style={styles.balanceLabel}>Available Balance</Text>
+              <Animated.Text
+                style={[
+                  styles.balanceText,
+                  { opacity: balanceAnim },
+                ]}
+              >
+                ₹{userData?.balance}
+              </Animated.Text>
+            </View>
+          </View>
+          <View style={styles.securityBadge}>
+            <FontAwesome name="lock" size={14} color="#FFFFFF" />
+            <Text style={styles.securityBadgeText}>Secured by Bharat Transact</Text>
+          </View>
       </View>
 
       {error ? (
@@ -128,8 +245,9 @@ const RecentTransactions = ({ navigation }) => {
           }
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <MaterialIcons name="history" size={50} color="#1F41B1" />
+              <FontAwesome name="history" size={50} color="#1F41B1" />
               <Text style={styles.emptyText}>No transactions found</Text>
+              <Text style={styles.emptySubText}>Your transaction history will appear here</Text>
             </View>
           }
         />
@@ -141,80 +259,99 @@ const RecentTransactions = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F5F5F5',
   },
   header: {
+    paddingTop: Platform.OS === 'ios' ? 50 : 20,
+    paddingBottom: 20,
+  },
+  headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#1F41B1',
-    paddingTop: 50,
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
   },
   backButton: {
-    marginRight: 15,
+    width: 40,
+    alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     color: 'white',
+    textAlign: 'center',
+    flex: 1,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#F5F5F5',
   },
   listContainer: {
-    padding: 20,
+    padding: 16,
   },
   transactionItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 15,
+    padding: 16,
     backgroundColor: 'white',
-    borderRadius: 10,
-    marginBottom: 10,
+    borderRadius: 12,
+    marginBottom: 12,
     elevation: 2,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   transactionIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(31, 65, 177, 0.1)',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 15,
+    marginRight: 16,
   },
   transactionDetails: {
     flex: 1,
   },
   transactionType: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
     color: '#333',
+    marginBottom: 4,
   },
   transactionDate: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#666',
-    marginTop: 4,
+  },
+  amountContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   transactionAmount: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
+    marginRight: 8,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    marginTop: 40,
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1F41B1',
+    marginTop: 16,
+  },
+  emptySubText: {
+    fontSize: 14,
     color: '#666',
-    marginTop: 10,
+    marginTop: 8,
+    textAlign: 'center',
   },
   errorContainer: {
     flex: 1,
@@ -225,19 +362,89 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 16,
     color: '#F44336',
-    marginTop: 10,
+    marginTop: 16,
     textAlign: 'center',
   },
   retryButton: {
     marginTop: 20,
-    padding: 10,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
     backgroundColor: '#1F41B1',
-    borderRadius: 5,
+    borderRadius: 8,
   },
   retryButtonText: {
     color: 'white',
     fontSize: 16,
+    fontWeight: '600',
+  },
+  balanceCardWrapper: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 15,
+    margin: 20,
+    marginBottom: 10,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  welcomeHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  welcomeText: {
+    fontSize: 22,
     fontWeight: 'bold',
+    color: '#1F41B1',
+  },
+  balanceContainer: {
+    backgroundColor: '#1F41B1',
+    padding: 18,
+    borderRadius: 15,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    marginTop: 10,
+    marginBottom: 10,
+    width: width * 0.9,
+    alignSelf: 'center',
+  },
+  balanceLabel: {
+    fontSize: 14,
+    color: '#FFFFFF',
+    marginBottom: 5,
+  },
+  balanceText: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 0,
+  },
+  balanceButton: {
+    marginLeft: 12,
+    padding: 6,
+    borderRadius: 20,
+  },
+  securityBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+    backgroundColor: 'rgba(31,65,177,0.08)',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    alignSelf: 'flex-start',
+  },
+  securityBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    marginLeft: 6,
+    fontWeight: '600',
   },
 });
 

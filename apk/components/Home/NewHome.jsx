@@ -9,8 +9,9 @@ import {
   StatusBar,
   ImageBackground,
   ScrollView,
+  RefreshControl,
 } from 'react-native';
-import { MaterialIcons, AntDesign } from '@expo/vector-icons';
+import { MaterialIcons, AntDesign, FontAwesome } from '@expo/vector-icons';
 import Sidebar from '../Sidebar/sidebar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -24,6 +25,9 @@ const NewHome = ({ navigation }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const slideAnim = useRef(new Animated.Value(-SIDEBAR_WIDTH)).current;
   const [userData, setUserData] = useState(null);
+  const [showBalance, setShowBalance] = useState(false);
+  const [balanceAnim] = useState(new Animated.Value(1));
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetchUserData();
@@ -36,19 +40,36 @@ const NewHome = ({ navigation }) => {
         navigation.replace('OpenAppLoading');
         return;
       }
-
       const response = await axios.get(`${url_api}/api/user/get-user-by-JWT`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-
       if (response.data && response.data.userDetails) {
         setUserData(response.data.userDetails);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
     }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchUserData();
+    setRefreshing(false);
+  };
+
+  const handleBalanceToggle = () => {
+    Animated.timing(balanceAnim, {
+      toValue: 0,
+      duration: 150,
+      useNativeDriver: true,
+    }).start(() => {
+      setShowBalance((prev) => !prev);
+      Animated.timing(balanceAnim, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }).start();
+    });
   };
 
   const toggleSidebar = () => {
@@ -61,20 +82,9 @@ const NewHome = ({ navigation }) => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const closeSidebar = () => {
-    Animated.timing(slideAnim, {
-      toValue: -SIDEBAR_WIDTH,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-    setIsSidebarOpen(false);
-  };
-
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor="#1F41B1" barStyle="light-content" />
-      
-      {/* Sidebar */}
       <Animated.View
         style={[
           styles.sidebar,
@@ -82,12 +92,10 @@ const NewHome = ({ navigation }) => {
             transform: [{ translateX: slideAnim }],
           },
         ]}>
-        <Sidebar navigation={navigation} onClose={closeSidebar} />
+        <Sidebar navigation={navigation} onClose={toggleSidebar} />
       </Animated.View>
 
-      {/* Main Content */}
       <View style={styles.mainContent}>
-        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={toggleSidebar} style={styles.menuButton}>
             <MaterialIcons name="menu" size={30} color="white" />
@@ -95,13 +103,13 @@ const NewHome = ({ navigation }) => {
           <Text style={styles.headerTitle}>Bharat Transact</Text>
           <View style={styles.headerRight} />
         </View>
-
-        {/* Content */}
-        <ScrollView style={styles.scrollView}>
+        <ScrollView
+          style={styles.scrollView}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        >
           <ImageBackground
             source={require('../Home/bgc.jpg')}
             style={styles.content}>
-            {/* Welcome Card */}
             <View style={styles.welcomeContainer}>
               <View style={styles.welcomeHeader}>
                 <Text style={styles.welcomeText}>
@@ -112,14 +120,29 @@ const NewHome = ({ navigation }) => {
                 </TouchableOpacity>
               </View>
               <View style={styles.balanceContainer}>
-                <Text style={styles.balanceLabel}>Available Balance</Text>
-                <Text style={styles.balanceText}>
-                  ₹{userData?.balance || '0.00'}
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <View>
+                    <Text style={styles.balanceLabel}>Available Balance</Text>
+                    <Animated.Text
+                      style={[
+                        styles.balanceText,
+                        { opacity: balanceAnim },
+                      ]}
+                    >
+                      {showBalance ? `₹${userData?.balance || '0.00'}` : 'XXXXX'}
+                    </Animated.Text>
+                  </View>
+                  <TouchableOpacity style={styles.balanceButton} onPress={handleBalanceToggle}>
+                    <FontAwesome name={showBalance ? 'eye' : 'eye-slash'} size={20} color="#FFFFFF" />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.securityBadge}>
+                  <FontAwesome name="lock" size={14} color="#FFFFFF" />
+                  <Text style={styles.securityBadgeText}>Secured by Bharat Transact</Text>
+                </View>
               </View>
             </View>
 
-            {/* Quick Actions Banner */}
             <View style={styles.quickActionsBanner}>
               <Text style={styles.bannerTitle}>Quick Actions</Text>
               <View style={styles.quickActions}>
@@ -142,18 +165,17 @@ const NewHome = ({ navigation }) => {
                 </TouchableOpacity>
               </View>
             </View>
-            {/* Services Banner */}
             <View style={styles.servicesBanner}>
               <Text style={styles.bannerTitle}>Our Services</Text>
               <View style={styles.servicesGrid}>
-                <TouchableOpacity style={styles.serviceItem}>
+                <TouchableOpacity style={styles.serviceItem} onPress={()=>navigation.navigate('BankTransfer')}>
                   <View style={styles.serviceIconContainer}>
                     <MaterialIcons name="account-balance" size={30} color="#1F41B1" />
                   </View>
                   <Text style={styles.serviceText}>Bank Transfer</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.serviceItem}>
+                <TouchableOpacity style={styles.serviceItem} onPress={()=>{navigation.navigate("PayBills")}}>
                   <View style={styles.serviceIconContainer}>
                     <MaterialIcons name="payment" size={30} color="#1F41B1" />
                   </View>
@@ -170,7 +192,7 @@ const NewHome = ({ navigation }) => {
                   <Text style={styles.serviceText}>Transaction History</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.serviceItem}>
+                <TouchableOpacity style={styles.serviceItem} onPress={()=>{navigation.navigate("Support")}}>
                   <View style={styles.serviceIconContainer}>
                     <MaterialIcons name="support-agent" size={30} color="#1F41B1" />
                   </View>
@@ -178,8 +200,6 @@ const NewHome = ({ navigation }) => {
                 </TouchableOpacity>
               </View>
             </View>
-
-            {/* Promotions Banner */}
             <View style={styles.promotionsBanner}>
               <Text style={styles.bannerTitle}>Special Offers</Text>
               <View style={styles.promotionCard}>
@@ -197,13 +217,11 @@ const NewHome = ({ navigation }) => {
           </ImageBackground>
         </ScrollView>
       </View>
-
-      {/* Overlay */}
       {isSidebarOpen && (
         <TouchableOpacity
           style={styles.overlay}
           activeOpacity={1}
-          onPress={closeSidebar}
+          onPress={toggleSidebar}
         />
       )}
     </View>
@@ -283,18 +301,47 @@ const styles = StyleSheet.create({
   },
   balanceContainer: {
     backgroundColor: '#1F41B1',
-    padding: 15,
-    borderRadius: 10,
+    padding: 18,
+    borderRadius: 15,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    marginTop: 10,
+    marginBottom: 10,
   },
   balanceLabel: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: '#FFFFFF',
     marginBottom: 5,
   },
   balanceText: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: 'white',
+    color: '#FFFFFF',
+    marginBottom: 0,
+  },
+  balanceButton: {
+    marginLeft: 12,
+    padding: 6,
+    borderRadius: 20,
+  },
+  securityBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+    backgroundColor: 'rgba(31,65,177,0.08)',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    alignSelf: 'flex-start',
+  },
+  securityBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    marginLeft: 6,
+    fontWeight: '600',
   },
   quickActionsBanner: {
     backgroundColor: 'white',

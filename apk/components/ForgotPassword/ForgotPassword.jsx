@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, Dimensions, ImageBackground, TouchableOpacity, TextInput, ActivityIndicator, Alert } from 'react-native';
-import FontAwesome from "react-native-vector-icons/FontAwesome";
-import axios from 'axios';
-import { url_api } from '../../impUrl'; 
+import { StyleSheet, Text, View, Dimensions, TouchableOpacity, TextInput, ActivityIndicator, Alert } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
 const { width, height } = Dimensions.get("window");
+import { url_api } from '../../impUrl'; 
+import axios from 'axios';
 const url = url_api;
 
 export default function ForgotPassword({ navigation }) {
@@ -35,21 +35,14 @@ export default function ForgotPassword({ navigation }) {
   };
 
   return (
-    <>
-    <ImageBackground
-      source={require('./bgc.jpg')}
-      style={styles.container}
-    >
-      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-        <FontAwesome name="arrow-left" size={30} color="#1F41B1" />
+    <View style={styles.container}>
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <FontAwesome name="arrow-left" size={26} color="#1F41B1" />
       </TouchableOpacity>
-      <Text style={styles.headingText}>Forgot Password</Text>
-      <View style={styles.content}>
-        <Text style={styles.contentText}>Please enter your email to reset the password</Text>
-      </View>
-      <View style={styles.inputs}>
-        <View style={styles.emailContainer}>
-          <FontAwesome name={"user"} size={24} color={"#000"} style={styles.inputIcon} />
+      <View style={styles.card}>
+        <Text style={styles.headingText}>Forgot Password</Text>
+        <Text style={styles.subtitle}>Please enter your email to reset the password</Text>
+        <View style={styles.inputs}>
           <TextInput
             placeholder='Email'
             style={styles.textInput}
@@ -57,89 +50,92 @@ export default function ForgotPassword({ navigation }) {
             onChangeText={(text) => setEmail(text.toLowerCase())}
             keyboardType="email-address"
             autoCapitalize="none"
-            />
+          />
         </View>
-      </View>
-      <View>
-        <TouchableOpacity onPress={handleNext} disabled={loading}> 
-          <View style={styles.ResetButton}>
-            {loading ? (
-                <ActivityIndicator size="small" color="white" />
-            ) : (
-                <Text style={styles.btnText}>Reset Password</Text>
-            )}
-          </View>
+        <TouchableOpacity onPress={handleNext} disabled={loading} style={styles.ResetButton}>
+          {loading ? (
+            <ActivityIndicator size="small" color="white" />
+          ) : (
+            <Text style={styles.btnText}>Reset Password</Text>
+          )}
         </TouchableOpacity>
       </View>
-    </ImageBackground>
-    </>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "flex-start",
-    alignItems: "center",
-    paddingTop: height * 0.2,
-  },
-  backButton: {
-    position: 'absolute',
-    top: height * 0.09,
-    left: 20,
-    zIndex: 1,  
-  },
-  headingText: {
-    color: "#1F41B1",
-    fontSize: height * 0.08,
-    fontWeight: "900",
-  },
-  content: {
-    paddingTop: 25,
-  },
-  contentText: {
-    fontSize: height * 0.02,
-    fontWeight: "800",
-  },
-  inputs: {
-    paddingTop: height * 0.05,
-    width: "80%",
-  },
-  emailContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: width * 0.8,
-    height: height * 0.07,
-    backgroundColor: "#BED8FE",
-    borderRadius: 10,
-    marginBottom: 20,
-    paddingHorizontal: 10,
-    elevation: 5,
-  },
-  inputIcon: {
-    marginRight: 10,
-  },
-  textInput: {
-    flex: 1,
-    fontSize: height * 0.02,
-    paddingVertical: 10,
-  },
-  ResetButton: {
-    fontSize: height * 0.025,
-    color: 'white',
-    backgroundColor: '#1F41BB',
-    borderRadius: 6,
-    paddingVertical: 12,
-    paddingHorizontal: 50,
-    fontWeight: "700",
-    width: width * 0.8,
-    textAlign: "center",
+    backgroundColor: '#1F41B1',
     justifyContent: 'center',
     alignItems: 'center',
   },
+  backButton: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
+    zIndex: 10,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 6,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+  },
+  card: {
+    width: '90%',
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  headingText: {
+    color: '#1F41B1',
+    fontSize: 26,
+    fontWeight: '800',
+    alignSelf: 'flex-start',
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 15,
+    color: '#888',
+    alignSelf: 'flex-start',
+    marginBottom: 18,
+  },
+  inputs: {
+    width: '100%',
+    marginBottom: 18,
+  },
+  textInput: {
+    width: '100%',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    padding: 14,
+    fontSize: 16,
+    color: '#222',
+    marginBottom: 0,
+  },
+  ResetButton: {
+    width: '100%',
+    backgroundColor: '#1F41B1',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    marginTop: 8,
+  },
   btnText: {
-    fontSize: height * 0.025,
     color: 'white',
-    fontWeight: "700",
+    fontSize: 18,
+    fontWeight: '700',
   },
 });
