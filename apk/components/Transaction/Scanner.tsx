@@ -1,8 +1,10 @@
-import { StyleSheet, Text, View, TouchableOpacity, ImageBackground, Dimensions, Alert } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Dimensions, Alert } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import { CameraView, useCameraPermissions, BarcodeScanningResult } from 'expo-camera';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { FontAwesome } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+
 const { height, width } = Dimensions.get('window');
 
 export default function Scanner({ navigation }) {
@@ -32,126 +34,162 @@ export default function Scanner({ navigation }) {
     if (!scanned) {
       setScanned(true);
       setScanResult(data);
-      Alert.alert("Scanned QR Code", `The scanned qr code data is: ${data}`);
       console.log(data);
+      navigation.navigate('ScannedSendMoney', {
+        scannedData: data
+      });
     }
   }
 
   return (
-    <ImageBackground source={require("./bgc.jpg")} style={styles.container}>
-      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-        <FontAwesome name="arrow-left" size={30} color="#1F41B1" />
-      </TouchableOpacity>
-      <Text style={styles.headingText}>Scan And Pay</Text>
-      <View style={styles.cameraBox}>
-        <CameraView
-          style={styles.scanner}
-          facing="back"
-          onBarcodeScanned={scanned ? undefined : handleScan}
-          barcodeScannerSettings={{
-            barcodeTypes: ['qr'],
-          }}
-          enableTorch={torch}
-        />
-      </View>
-      <TouchableOpacity onPress={toggleTorch}>
-        <MaterialIcons name={torch ? "flashlight-on" : "flashlight-off"} size={28} color="black" style={styles.icon} />
-      </TouchableOpacity>
+    <View style={styles.container}>
+      <LinearGradient
+        colors={['#2563EB', '#1E40AF']}
+        style={styles.header}
+      >
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <FontAwesome name="arrow-left" size={20} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.headerText}>Scan & Pay</Text>
+        <View style={styles.placeholder} />
+      </LinearGradient>
 
-      <TouchableOpacity onPress={() => setScanned(false)}>
-        <Text style={styles.button}>Scan again</Text>
-      </TouchableOpacity>
-    </ImageBackground>
+      <View style={styles.content}>
+        <View style={styles.card}>
+          <View style={styles.cameraBox}>
+            <CameraView
+              style={styles.scanner}
+              facing="back"
+              onBarcodeScanned={scanned ? undefined : handleScan}
+              barcodeScannerSettings={{
+                barcodeTypes: ['qr'],
+              }}
+              enableTorch={torch}
+            />
+          </View>
+
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity 
+              style={styles.torchButton} 
+              onPress={toggleTorch}
+            >
+              <MaterialIcons 
+                name={torch ? "flashlight-on" : "flashlight-off"} 
+                size={24} 
+                color="#2563EB" 
+              />
+              <Text style={styles.torchButtonText}>
+                {torch ? "Turn Off Flash" : "Turn On Flash"}
+              </Text>
+            </TouchableOpacity>
+
+            {scanned && (
+              <TouchableOpacity 
+                style={styles.scanAgainButton}
+                onPress={() => setScanned(false)}
+              >
+                <Text style={styles.scanAgainButtonText}>Scan Again</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    paddingTop: height * 0.15,
+    backgroundColor: '#f8fafc',
   },
-  headingText: {
-    color: "#1F41B1",
-    fontSize: height * 0.08,
-    fontWeight: "900",
-    textAlign: 'center',
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: height * 0.05,
+    paddingHorizontal: 20,
+    paddingBottom: 15,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  backButton: {
+    padding: 10,
+  },
+  headerText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: '600',
+  },
+  placeholder: {
+    width: 40,
+  },
+  content: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    padding: 20,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    width: '90%',
+    alignItems: 'center',
   },
   cameraBox: {
-    width: 300,
-    height: 300,
-    borderWidth: 5,
-    borderColor: 'blue',
+    width: width * 0.7,
+    height: width * 0.7,
+    borderWidth: 2,
+    borderColor: '#2563EB',
     overflow: 'hidden',
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 50,
-    marginTop: height * 0.05,
-    marginBottom: height * 0.04,
+    borderRadius: 15,
+    marginBottom: 20,
   },
   scanner: {
     width: '100%',
     height: '100%',
   },
-  button: {
-    color: 'white',
-    textAlign: 'center',
-    padding: 10,
-    backgroundColor: '#1F41B1',
-    borderRadius: 6,
-    marginTop: 10,
-    fontSize: height * 0.025,
-    paddingVertical: 12,
-    paddingHorizontal: 50,
-    fontWeight: '700',
-  },
-  message: {
-    color: '#1F41B1',
-    textAlign: 'center',
-    marginTop: height * 0.2,
-    marginBottom: height * 0.04,
-    fontSize: 28,
-    fontWeight: '500',
-  },
-  permissionButton: {
-    paddingVertical: 12,
-    backgroundColor: '#1f41b1',
-    borderRadius: 5,
-    width: width * 0.7, 
-    justifyContent: 'center',
+  buttonContainer: {
+    width: '100%',
     alignItems: 'center',
-    marginTop: height * 0.04,
-    alignSelf: 'center', 
+    gap: 15,
   },
-  permissionButtonText: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: 'white',
-    textAlign: 'center',
-  },
-  scanResultContainer: {
-    flex: 1,
-    justifyContent: 'center',
+  torchButton: {
+    flexDirection: 'row',
     alignItems: 'center',
-    width: 300,
-    backgroundColor: '#121212',
-  },
-  scanResultText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-    padding: 20,
-    backgroundColor: '#F06292',
+    backgroundColor: '#f8fafc',
+    padding: 12,
     borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    gap: 8,
   },
-  icon: {
-    marginBottom: height * 0.02,
+  torchButtonText: {
+    color: '#2563EB',
+    fontSize: 16,
+    fontWeight: '600',
   },
-  backButton: {
-    position: 'absolute',
-    top: height * 0.09,
-    left: 20,
-    zIndex: 1,
+  scanAgainButton: {
+    backgroundColor: '#2563EB',
+    borderRadius: 12,
+    padding: 15,
+    width: '100%',
+    alignItems: 'center',
+  },
+  scanAgainButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

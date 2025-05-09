@@ -10,77 +10,60 @@ import {
   Dimensions,
   KeyboardAvoidingView,
   Platform,
-  ScrollView
 } from "react-native";
 import { FontAwesome } from '@expo/vector-icons';
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from 'expo-linear-gradient';
 import axios from "axios";
 
 const { url_api } = require("../../impUrl");
 const url = url_api;
-const { width, height } = Dimensions.get("window");
 
-const SendMoney = ({ navigation, route }) => {
-  const logout = async () => {
-    try {
-      await AsyncStorage.removeItem("jwt_token");
-      navigation.replace("OpenAppLoading");
-    } catch (error) {
-      Alert.alert("An Error Occurred While logging out. Please Try Again Later");
-    }
-  };
+const { height, width } = Dimensions.get("window");
+
+const ScannedSendMoney = ({ navigation, route }) => {
   const [amount, setAmount] = useState("");
-  const [recipient, setRecipient] = useState("");
-  const [jwtToken, setJwtToken] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchToken = async () => {
-      try {
-        const token = await AsyncStorage.getItem("jwt_token");
-        if (token) {
-          setJwtToken(token);
-        } else {
-          Alert.alert("Error", "JWT token not found. Please log in again.");
-        }
-      } catch (error) {
-        console.error("Error fetching JWT token:", error);
-        Alert.alert("Error", "Failed to retrieve JWT token.");
-      }
-    };
+  const userData = {
+    name: "John Doe",
+    email: route.params?.scannedData || "user@example.com"
+  };
 
-    fetchToken();
-  }, []);
-
-  useEffect(() => {
-    if (route.params?.scannedData) {
-      setRecipient(route.params.scannedData);
-    }
-  }, [route.params?.scannedData]);
-
-  const handleSendMoney = () => {
-    if (!amount || !recipient) {
-      Alert.alert("Error", "Please enter both recipient and amount.");
-      return;
-    }
-
-    if (!jwtToken) {
-      Alert.alert("Error", "JWT token is missing. Please log in again.");
-      navigation.navigate("Login");
+  const handleProceed = () => {
+    if (!amount) {
+      Alert.alert("Error", "Please enter the amount.");
       return;
     }
 
     setLoading(true);
-    // Show loader for 1 second then navigate to MPIN
-    setTimeout(() => {
+    axios.post(
+      `${url}/api/transaction/verify-email`,
+      { email: userData.email },
+      {
+        timeout: 10000,
+      }
+    )
+    .then((response) => {
+      if (response.data.exists) {
+        navigation.navigate('MPIN', {
+          amount: amount,
+          recipient: userData.email,
+          fromScreen: 'ScannedSendMoney'
+        });
+      } else {
+        Alert.alert("Error", "Recipient email not found in our system.");
+      }
+    })
+    .catch((error) => {
+      console.error("Email verification error:", error);
+      Alert.alert(
+        "Error",
+        "Failed to verify recipient. Please try again."
+      );
+    })
+    .finally(() => {
       setLoading(false);
-      navigation.navigate('Mpin', {
-        amount: amount,
-        recipient: recipient,
-        fromScreen: 'SendMoney'
-      });
-    }, 1000);
+    });
   };
 
   return (
@@ -99,22 +82,14 @@ const SendMoney = ({ navigation, route }) => {
         <View style={styles.placeholder} />
       </LinearGradient>
 
-      <View style={styles.content} contentContainerStyle={styles.contentContainer}>
+      <View style={styles.content}>
         <View style={styles.card}>
-          <View style={styles.inputContainer}>
-            <View style={styles.inputLabelContainer}>
-              <FontAwesome name="user" size={20} color="#2563EB" />
-              <Text style={styles.inputLabel}>Recipient Email</Text>
+          <View style={styles.userInfoContainer}>
+            <View style={styles.userIconContainer}>
+              <FontAwesome name="user-circle" size={50} color="#2563EB" />
             </View>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter recipient's email"
-              placeholderTextColor="#666"
-              value={recipient}
-              onChangeText={(text) => setRecipient(text.toLowerCase())}
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
+            <Text style={styles.userName}>{userData.name}</Text>
+            <Text style={styles.userEmail}>{userData.email}</Text>
           </View>
 
           <View style={styles.inputContainer}>
@@ -136,14 +111,14 @@ const SendMoney = ({ navigation, route }) => {
           </View>
 
           <TouchableOpacity
-            style={[styles.sendButton, loading && styles.sendButtonDisabled]}
-            onPress={handleSendMoney}
+            style={[styles.proceedButton, loading && styles.proceedButtonDisabled]}
+            onPress={handleProceed}
             disabled={loading}
           >
             {loading ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
-              <Text style={styles.sendButtonText}>Proceed to Pay</Text>
+              <Text style={styles.proceedButtonText}>Proceed to Pay</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -186,9 +161,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  contentContainer: {
-    width: width * 0.85,
-  },
   card: {
     backgroundColor: '#fff',
     borderRadius: 15,
@@ -199,6 +171,23 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     width: '90%',
+  },
+  userInfoContainer: {
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  userIconContainer: {
+    marginBottom: 15,
+  },
+  userName: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: '#1E293B',
+    marginBottom: 5,
+  },
+  userEmail: {
+    fontSize: 16,
+    color: '#64748B',
   },
   inputContainer: {
     marginBottom: 20,
@@ -213,15 +202,6 @@ const styles = StyleSheet.create({
     color: '#2563EB',
     fontWeight: '600',
     marginLeft: 8,
-  },
-  input: {
-    backgroundColor: '#f8fafc',
-    borderRadius: 10,
-    padding: 15,
-    fontSize: 16,
-    color: '#333',
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
   },
   amountInputContainer: {
     flexDirection: 'row',
@@ -244,21 +224,21 @@ const styles = StyleSheet.create({
     color: '#333',
     fontWeight: '500',
   },
-  sendButton: {
+  proceedButton: {
     backgroundColor: '#2563EB',
     borderRadius: 12,
     padding: 15,
     alignItems: 'center',
     marginTop: 10,
   },
-  sendButtonDisabled: {
+  proceedButtonDisabled: {
     backgroundColor: '#94a3b8',
   },
-  sendButtonText: {
+  proceedButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },
 });
 
-export default SendMoney;
+export default ScannedSendMoney;
