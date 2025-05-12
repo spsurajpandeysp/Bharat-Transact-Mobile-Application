@@ -1,4 +1,6 @@
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator } from 'react-native'
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState } from 'react'
 import { OtpInput } from "react-native-otp-entry";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
@@ -17,34 +19,42 @@ export default function Mpin({ navigation, route }) {
 
         setLoading(true);
         try {
-                const response = await fetch(`${url_api}/api/transaction/send-money`, {
-                method: 'POST',
+            const token = await AsyncStorage.getItem('jwt_token');
+            console.log("token", token);
+            console.log(route.params.recipient, route.params.amount, mpin);
+
+            const response = await axios.post(`${url_api}/api/transaction/send-money`, 
+            {
+                recipient: route.params.recipient,
+                amount: route.params.amount,
+                mpin: mpin,
+            }, 
+            {
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({
-                    recipient: route.params.recipient,
-                    amount: route.params.amount,
-                    mpin: mpin,
-                }),
+                timeout: 20000, // Increased timeout to 20 seconds
             });
 
-            const data = await response.json();
-            setLoading(false);
-
-            if (response.ok) {
+            console.log("response", response);
+            if (response.status === 200) {
                 navigation.navigate('TransactionSuccessfull', {
                     amount: route.params.amount,
                     recipient: route.params.recipient,
                     // Add more fields if needed
                 });
             } else {
-                Alert.alert("Error", data.message || "Transaction failed.");
+                const errorMessage = response.data.message || "Transaction failed.";
+                console.log("Error:", errorMessage);
+                Alert.alert("Error", errorMessage);
             }
         } catch (error) {
+            const errorMessage = error.response?.data?.message || "An unexpected error occurred during the transaction.";
+            console.error("Transaction error:", errorMessage);
+            Alert.alert("Transaction Error", errorMessage);
+        } finally {
             setLoading(false);
-            Alert.alert("Error", "An error occurred while processing the transaction.");
         }
     };
 

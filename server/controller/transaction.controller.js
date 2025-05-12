@@ -6,6 +6,7 @@ const mongoose = require('mongoose')
 const sendMoney = async (req, res) => {
   const { recipient, amount,mpin } = req.body;
   const { userId } = req.user;
+  console.log("sendMoney",recipient, amount,mpin)
 
   if (!userId || !recipient || !amount || amount <= 0 || !mpin) {
       return res.status(400).json({ message: "Invalid input. or Required All Fields" });
@@ -30,6 +31,7 @@ const sendMoney = async (req, res) => {
       const toAccount = await User.findOne({ phoneNumber: recipient }).session(session);
 
       if (!toAccount) {
+        
           throw new Error("Receiver Account not found.");
       }
 
