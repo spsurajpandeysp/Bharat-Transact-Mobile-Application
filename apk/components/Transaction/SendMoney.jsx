@@ -103,17 +103,16 @@ const SendMoney = ({ navigation, route }) => {
         <View style={styles.card}>
           <View style={styles.inputContainer}>
             <View style={styles.inputLabelContainer}>
-              <FontAwesome name="user" size={20} color="#2563EB" />
-              <Text style={styles.inputLabel}>Recipient Email</Text>
+              <FontAwesome name="phone" size={20} color="#2563EB" />
+              <Text style={styles.inputLabel}>Recipient Phone Number</Text>
             </View>
             <TextInput
               style={styles.input}
-              placeholder="Enter recipient's email"
+              placeholder="Enter recipient's phone number"
               placeholderTextColor="#666"
               value={recipient}
-              onChangeText={(text) => setRecipient(text.toLowerCase())}
-              autoCapitalize="none"
-              keyboardType="email-address"
+              onChangeText={setRecipient}
+              keyboardType="phone-pad"
             />
           </View>
 

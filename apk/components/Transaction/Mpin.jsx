@@ -4,28 +4,48 @@ import { OtpInput } from "react-native-otp-entry";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { LinearGradient } from 'expo-linear-gradient';
 const {height,width}=Dimensions.get('window');
-
+import { url_api } from '../../impUrl';
 export default function Mpin({ navigation, route }) {
     const [loading, setLoading] = useState(false);
     const [mpin, setMpin] = useState("");
 
-    const handleVerifyMpin = () => {
+    const handleVerifyMpin = async () => {
         if (!mpin || mpin.length !== 4) {
             Alert.alert("Error", "Please enter a valid 4-digit MPIN.");
             return;
         }
 
         setLoading(true);
-        setTimeout(() => {
+        try {
+                const response = await fetch(`${url_api}/api/transaction/send-money`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    recipient: route.params.recipient,
+                    amount: route.params.amount,
+                    mpin: mpin,
+                }),
+            });
+
+            const data = await response.json();
             setLoading(false);
-            if (route.params?.fromScreen === 'SendMoney' || route.params?.fromScreen === 'ScannedSendMoney') {
+
+            if (response.ok) {
                 navigation.navigate('TransactionSuccessfull', {
                     amount: route.params.amount,
                     recipient: route.params.recipient,
                     // Add more fields if needed
                 });
+            } else {
+                Alert.alert("Error", data.message || "Transaction failed.");
             }
-        }, 1000);
+        } catch (error) {
+            setLoading(false);
+            Alert.alert("Error", "An error occurred while processing the transaction.");
+        }
     };
 
     return (

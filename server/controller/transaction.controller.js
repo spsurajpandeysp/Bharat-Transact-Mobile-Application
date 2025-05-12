@@ -4,11 +4,21 @@ const mongoose = require('mongoose')
 
 
 const sendMoney = async (req, res) => {
-  const { recipient, amount } = req.body;
+  const { recipient, amount,mpin } = req.body;
   const { userId } = req.user;
 
-  if (!userId || !recipient || !amount || amount <= 0) {
+  if (!userId || !recipient || !amount || amount <= 0 || !mpin) {
       return res.status(400).json({ message: "Invalid input. or Required All Fields" });
+  }
+
+  if(mpin){
+    const user = await User.findById(userId);
+    if(!user){
+      return res.status(400).json({ message: "User not found." });
+    }
+    if(user.mpin !== mpin){
+      return res.status(400).json({ message: "Invalid MPIN." });
+    }
   }
 
   const session = await mongoose.startSession();
@@ -17,13 +27,13 @@ const sendMoney = async (req, res) => {
   try {
      
       const fromAccount = await User.findById(userId).session(session);
-      const toAccount = await User.findOne({ email: recipient }).session(session);
+      const toAccount = await User.findOne({ phoneNumber: recipient }).session(session);
 
       if (!toAccount) {
           throw new Error("Receiver Account not found.");
       }
 
-      if (fromAccount.email ==  toAccount.email) {
+      if (fromAccount.phoneNumber ==  toAccount.phoneNumber) {
         throw new Error("You not send money in your Account");
     }
 
