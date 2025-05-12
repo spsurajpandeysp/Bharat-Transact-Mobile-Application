@@ -7,7 +7,7 @@ import { url_api } from '../../impUrl';
 const {width,height}=Dimensions.get("window");
 const url=url_api
 export default function ConfirmPassword({navigation,route}) {
-  const {email,otp}=route.params;
+  const {phoneNumber,otp}=route.params;
   const [password,setPassword]=useState("");
   const [confirmPassword,setConfirmPassword]=useState("");
   const [loading,setLoading]=useState(false);
@@ -24,8 +24,9 @@ export default function ConfirmPassword({navigation,route}) {
     }
     setLoading(true);
     try{
-        const response=await axios.post(`${url}/auth/api/reset-password`,{
-            email,
+        console.log(phoneNumber,otp,password,confirmPassword)
+        const response=await axios.post(`${url}/api/auth/reset-password`,{
+            phoneNumber,
             otp,
             newPassword:password,
             confirmNewPassword:confirmPassword,
@@ -36,6 +37,7 @@ export default function ConfirmPassword({navigation,route}) {
         }
     }
         catch(error){
+            console.log(error)
             Alert.alert("Error",error.response?.data?.message || "Something went wrong. Please try again.");
         } finally{
             setLoading(false);

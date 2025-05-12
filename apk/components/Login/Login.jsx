@@ -7,28 +7,30 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const { width, height } = Dimensions.get('window');
 const url = url_api;
 const Login = ({ navigation }) => {
-  const [email, setEmail] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const handleLogin = () => {
     if (loading) return; 
 
-    if (!email || !password) {
-      Alert.alert("Error", "Please fill in both email and password!");
+    if (!phoneNumber || !password) {
+      Alert.alert("Error", "Please fill in both phone number and password!");
       return;
     }
-    const emailRegex= /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com/;
-    if(!emailRegex.test(email)){
-      Alert.alert("Error","Please Enter Valid Email")
+    const phoneRegex = /^[0-9]{10}$/;
+    if(!phoneRegex.test(phoneNumber)){
+      Alert.alert("Error","Please Enter Valid 10-digit Phone Number")
+      return;
     }
-    const passwordRegex=/^(?=.*[!@#$%^&*()_+={}\[\]:;"'<>,.?/-])(?=.*\d).{7}$/
-    if(!passwordRegex.test(password)){
-      Alert.alert("Error","Password must be 7 characters long, contain at least one special character and number");
-    }
+    // const passwordRegex=/^(?=.*[!@#$%^&*()_+={}\[\]:;"'<>,.?/-])(?=.*\d).{7}$/
+    // if(!passwordRegex.test(password)){
+    //   Alert.alert("Error","Password must be 7 characters long, contain at least one special character and number");
+    //   return;
+    // }
 
     setLoading(true); 
-    axios.post(`${url}/auth/api/login`, { email, password })
+    axios.post(`${url}/api/auth/login`, { phoneNumber, password })
       .then(async (response) => {
         const jwt = response.data.token;
         if (jwt) {
@@ -42,12 +44,12 @@ const Login = ({ navigation }) => {
         if (error.response) {
           const errorMessage = error.response.data.message;
           if (errorMessage.includes("User not found")) {
-            Alert.alert("Error", "User not found. Please check your email.");
+            Alert.alert("Error", "User not found. Please check your phone number.");
           } else if (errorMessage.includes("Invalid credentials")) {
             Alert.alert("Error", "Invalid password. Please try again.");
-          } else if (errorMessage.includes("Please verify your email before logging in.")) {
-            Alert.alert("Error", "Please verify your email before logging in.");
-            navigation.navigate("EmailVerifyOtp", { email, from: "LoginPage" });
+          } else if (errorMessage.includes("Please verify your phone before logging in.")) {
+            Alert.alert("Error", "Please verify your phone before logging in.");
+            navigation.navigate("PhoneVerifyOtp", { phoneNumber, from: "LoginPage" });
           } else {
             Alert.alert("Error", errorMessage || "Login failed. Please try again later.");
           }
@@ -84,10 +86,12 @@ const Login = ({ navigation }) => {
             </View>
             <TextInput
               style={styles.input}
-              placeholder="Email"
+              placeholder="Phone Number"
               placeholderTextColor="#888"
-              value={email}
-              onChangeText={setEmail}
+              value={phoneNumber}
+              onChangeText={setPhoneNumber}
+              keyboardType="phone-pad"
+              maxLength={10}
             />
             <View style={styles.passwordInputWrapper}>
               <TextInput

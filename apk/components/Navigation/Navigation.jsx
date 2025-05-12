@@ -4,7 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import Login from'../Login/Login';
 import SignUp from '../SignUp/SignUp';
 import ForgotPassword from '../ForgotPassword/ForgotPassword';
-import EmailVerifyOtp from '../SignUp/EmailVerify'
+import PhoneVerifyOtp from '../SignUp/PhoneVerify'
 import NewHome from '../Home/NewHome'
 import OpenAppLoading from '../Home/OpenAppLoading'
 import SendMoney from '../Transaction/SendMoney';
@@ -28,7 +28,7 @@ export default function Navigation() {
       <Stack.Screen name="Login" component={Login} options={{headerShown: false}} />
       <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }} />
       <Stack.Screen name="ForgotPassword" component={ForgotPassword} options={{ headerShown: false }} />
-      <Stack.Screen name="EmailVerifyOtp" component={EmailVerifyOtp} options={{headerShown: false}} />
+      <Stack.Screen name="PhoneVerifyOtp" component={PhoneVerifyOtp} options={{headerShown: false}} />
       <Stack.Screen name="Home" component={NewHome} options={{headerShown: false}} />
       <Stack.Screen name="OpenAppLoading" component={OpenAppLoading} options={{headerShown: false}} />
       <Stack.Screen name="SendMoney" component={SendMoney} options={{headerShown: false}} />

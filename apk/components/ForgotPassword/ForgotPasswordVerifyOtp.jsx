@@ -8,7 +8,7 @@ const { width, height } = Dimensions.get("window");
 const url = url_api;
 
 export default function FpVo({ navigation, route }) {
-  const { email } = route.params;  
+  const { phoneNumber } = route.params;  
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -27,8 +27,8 @@ export default function FpVo({ navigation, route }) {
     }
     setLoading(true);
     try {
-      const response = await axios.post(`${url}/auth/api/reset-password`, {
-        email,
+      const response = await axios.post(`${url}/api/auth/reset-password`, {
+        phoneNumber,
         otp,
         newPassword: password,
         confirmNewPassword: confirmPassword,
@@ -46,7 +46,7 @@ export default function FpVo({ navigation, route }) {
   const handleResendCode = async () => {
     setResending(true);
     try {
-      const response = await axios.post(`${url}/auth/api/forget-password`, { email });
+      const response = await axios.post(`${url}/api/auth/forget-password`, { phoneNumber });
       if (response.status === 200) {
         Alert.alert("Success", response.data.message || "OTP resent successfully!");
       }
@@ -68,8 +68,8 @@ export default function FpVo({ navigation, route }) {
         <FontAwesome name="arrow-left" size={26} color="#1F41B1" />
       </TouchableOpacity>
       <View style={styles.card}>
-        <Text style={styles.headingText}>Check your email</Text>
-        <Text style={styles.subtitle}>We sent a reset link to your {email}. Enter the 4-digit code mentioned in the email.</Text>
+        <Text style={styles.headingText}>Check your phone</Text>
+        <Text style={styles.subtitle}>We sent a verification code to {phoneNumber}. Enter the 4-digit code mentioned in the SMS.</Text>
         <OtpInput
           numberOfDigits={4}
           focusColor="#1F41B1"
@@ -128,9 +128,9 @@ export default function FpVo({ navigation, route }) {
           )}
         </TouchableOpacity>
         <View style={styles.reSendContainer}>
-          <Text style={styles.resend}>Haven't got the email yet? </Text>
+          <Text style={styles.resend}>Haven't got the SMS yet? </Text>
           <TouchableOpacity onPress={handleResendCode} disabled={resending}>
-            <Text style={styles.resendText}>{resending ? "Resending..." : "Resend Email"}</Text>
+            <Text style={styles.resendText}>{resending ? "Resending..." : "Resend SMS"}</Text>
           </TouchableOpacity>
         </View>
       </View>

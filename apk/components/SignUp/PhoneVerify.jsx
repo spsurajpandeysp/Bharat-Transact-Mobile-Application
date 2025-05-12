@@ -9,11 +9,11 @@ import { url_api } from '../../impUrl';
 const { width, height } = Dimensions.get("window");
 const url = url_api;
 
-const EmailVerifyOtp = ({ route, navigation }) => {
+const PhoneVerifyOtp = ({ route, navigation }) => {
   const [otp, setOtp] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResending, setIsResending] = useState(false);
-  const email = route.params?.email;
+  const phoneNumber = route.params?.phoneNumber;
   const prevPath = route.params?.from;
 
   const validateOtp = () => {
@@ -29,9 +29,9 @@ const EmailVerifyOtp = ({ route, navigation }) => {
 
     setIsSubmitting(true);
 
-    axios.post(`${url}/auth/api/email-verify`, { email, otp })
+    axios.post(`${url}/api/auth/phone-verify`, { phoneNumber, otp })
       .then((response) => {
-          Alert.alert("Success", "Email verified successfully!");
+          Alert.alert("Success", "Phone number verified successfully!");
           navigation.replace("Login");
       })
       .catch((error) => {
@@ -51,7 +51,7 @@ const EmailVerifyOtp = ({ route, navigation }) => {
   const resendHandle = () => {
     setIsResending(true);
 
-    axios.post(`${url}/auth/api/resend-email-verify-otp`, { email })
+    axios.post(`${url}/auth/api/resend-phone-verify-otp`, { phoneNumber })
       .then((response) => {
           Alert.alert("Message", "OTP resent successfully!");
       })
@@ -73,7 +73,7 @@ const EmailVerifyOtp = ({ route, navigation }) => {
 
       <View style={styles.content}>
         <Text style={styles.contentText}>
-          We sent a reset link to your email. Enter the 4-digit code mentioned in the email.
+          We sent a verification code to your phone number. Enter the 4-digit code mentioned in the SMS.
         </Text>
       </View>
 
@@ -115,10 +115,10 @@ const EmailVerifyOtp = ({ route, navigation }) => {
       </Button>
 
       <View style={styles.reSendContainer}>
-        <Text style={styles.resend}>Haven't got the email yet?</Text>
+        <Text style={styles.resend}>Haven't received the SMS yet?</Text>
         <TouchableOpacity onPress={resendHandle} disabled={isResending}>
           <Text style={styles.resendText}>
-            {isResending ? "Resending..." : "Resend Email"}
+            {isResending ? "Resending..." : "Resend SMS"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -217,4 +217,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EmailVerifyOtp;
+export default PhoneVerifyOtp;

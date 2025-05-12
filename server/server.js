@@ -40,7 +40,7 @@ app.use(bodyParser.json())
 app.get('/',(req,res)=>{
   res.send('Welcome to bharat transact')
 })
-app.use('/auth/api/',authRounter);
+app.use('/api/auth/',authRounter);
 app.use('/api/transaction/',transactionRouter);
 app.use('/api/money-request/',moneyRequestRounter);
 app.use('/api/user/',userRouter);

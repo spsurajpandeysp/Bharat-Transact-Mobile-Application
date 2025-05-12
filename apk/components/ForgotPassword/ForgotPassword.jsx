@@ -7,25 +7,26 @@ import axios from 'axios';
 const url = url_api;
 
 export default function ForgotPassword({ navigation }) {
-  const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleNext = async () => {
-    if (!email) {
-      Alert.alert("Error", "Please enter an email address");
+    if (!phoneNumber) {
+      Alert.alert("Error", "Please enter a phone number");
       return;
     }
     setLoading(true);
 
     try {
-      const response = await axios.post(`${url}/auth/api/forget-password`, { email });
+      const response = await axios.post(`${url}/api/auth/forget-password`, { phoneNumber });
 
       if (response.status === 200) {
-        navigation.navigate("ForgetPasswordVerifyOtp", { email });  
+        navigation.navigate("ForgetPasswordVerifyOtp", { phoneNumber });  
       }
     } catch (error) {
+      console.log(error)
       if (error.response && error.response.status === 404) {
-        Alert.alert("Error", "Account not found. Please check your email address.");
+        Alert.alert("Error", "Account not found. Please check your phone number.");
       } else {
         Alert.alert("Error", error.response?.data?.message || "Something went wrong. Please try again later.");
       }
@@ -41,15 +42,15 @@ export default function ForgotPassword({ navigation }) {
       </TouchableOpacity>
       <View style={styles.card}>
         <Text style={styles.headingText}>Forgot Password</Text>
-        <Text style={styles.subtitle}>Please enter your email to reset the password</Text>
+        <Text style={styles.subtitle}>Please enter your phone number to reset the password</Text>
         <View style={styles.inputs}>
           <TextInput
-            placeholder='Email'
+            placeholder='Phone Number'
             style={styles.textInput}
-            value={email}
-            onChangeText={(text) => setEmail(text.toLowerCase())}
-            keyboardType="email-address"
-            autoCapitalize="none"
+            value={phoneNumber}
+            onChangeText={setPhoneNumber}
+            keyboardType="phone-pad"
+            maxLength={10}
           />
         </View>
         <TouchableOpacity onPress={handleNext} disabled={loading} style={styles.ResetButton}>

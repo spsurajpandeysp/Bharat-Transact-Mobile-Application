@@ -10,46 +10,57 @@ const url = url_api;
 const New = ({ navigation }) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false); 
   const handleSignup = async () => {
-    if (!firstName || !lastName || !email || !password || !confirmPassword) {
+    if (!firstName || !lastName || !phoneNumber || !password || !confirmPassword) {
       Alert.alert("Error", "Please fill all the fields!");
       return;
     }
-    const emailRegex= /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com/;
-        if(!emailRegex.test(email)){
-          Alert.alert("Error","Please Enter Valid Email")
-        }
-        const passwordRegex=/^(?=.*[!@#$%^&*()_+={}\[\]:;"'<>,.?/-])(?=.*\d).{7}$/
-        if(!passwordRegex.test(password)){
-          Alert.alert("Error","Password must be 7 characters long, contain at least one special character and number");
-        }
+
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(phoneNumber)) {
+      Alert.alert("Error", "Please enter a valid 10-digit phone number");
+      return;
+    }
+
+    // const passwordRegex = /^(?=.*[!@#$%^&*()_+={}\[\]:;"'<>,.?/-])(?=.*\d).{7}$/;
+    // if (!passwordRegex.test(password)) {
+    //   Alert.alert("Error", "Password must be 7 characters long, contain at least one special character and number");
+    //   return;
+    // }
+
     if (password !== confirmPassword) {
       Alert.alert("Error", "Passwords do not match!");
       return;
     }
+    
+
+    console.log(firstName,lastName,phoneNumber,password,confirmPassword)
+    console.log(url)
     setLoading(true); 
-    axios.post(`${url}/auth/api/signup`, {
+    axios.post(`${url}/api/auth/signup`, {
       firstName,
       lastName,
-      email,
+      phoneNumber,
       password,
       confirmPassword,
     }, { timeout: 20000 })
       .then((response) => {
         setLoading(false);
+        console.log(response)
         if (response.status === 201 || response.status === 200) {
           console.log(response)
-          navigation.navigate("EmailVerifyOtp", { email });
+          navigation.navigate("PhoneVerifyOtp", { phoneNumber });
         } else {
           Alert.alert("Error", "Something went wrong. Please try again.");
         }
       })
       .catch((error) => {
         setLoading(false);
+        console.log(error)
         if (error.response) {
           if (error.response.status === 400) {
             Alert.alert("Error", error.response.data.message || "All fields are required.");
@@ -112,9 +123,11 @@ const New = ({ navigation }) => {
               <View style={styles.InputContainer}>
                 <TextInput
                   style={styles.textInput}
-                  placeholder="Email"
-                  value={email}
-                  onChangeText={setEmail}
+                  placeholder="Phone Number"
+                  value={phoneNumber}
+                  onChangeText={setPhoneNumber}
+                  keyboardType="phone-pad"
+                  maxLength={10}
                 />
               </View>
               <View style={styles.InputContainer}>
