@@ -58,7 +58,6 @@ const RecentTransactions = ({ navigation }) => {
         },
       });
       if (response.data && response.data.transactions) {
-        // Log the transactions to verify the data
         console.log('Fetched transactions:', response.data.transactions);
         const reversedTransactions = response.data.transactions.reverse();
         setTransactions(reversedTransactions);

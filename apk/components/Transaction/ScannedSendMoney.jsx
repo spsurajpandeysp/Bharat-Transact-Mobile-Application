@@ -13,58 +13,80 @@ import {
 } from "react-native";
 import { FontAwesome } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import axios from "axios";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 const { url_api } = require("../../impUrl");
-const url = url_api;
 
 const { height, width } = Dimensions.get("window");
 
 const ScannedSendMoney = ({ navigation, route }) => {
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
+  const [userDetails,setUserDetails]=useState({});
+  const [recipient,setRecipient]=useState("");
+  const [jwtToken, setJwtToken] = useState(null);
+  const qrcode=route.params?.scannedData;
+  console.log("Qrcode",qrcode)
+  useEffect(() => {
+    const fetchToken = async () => {
+      try {
+        const token = await AsyncStorage.getItem("jwt_token");
+        if (token) {
+          setJwtToken(token);
+        } else {
+          Alert.alert("Error", "JWT token not found. Please log in again.");
+        }
+      } catch (error) {
+        console.error("Error fetching JWT token:", error);
+        Alert.alert("Error", "Failed to retrieve JWT token.");
+      }
+    };
 
-  const userData = {
-    name: "John Doe",
-    email: route.params?.scannedData || "user@example.com"
-  };
+    fetchToken();
+  }, []);
+
+  const fetchUserDetails=async()=>{
+    try{
+      
+      const response=await axios.post(`${url_api}/api/user/get-user-by-qr-code`,{qrCode:qrcode},{
+      })
+      console.log("response",response.data)
+      const userDetails=response.data.userDetails;
+      setUserDetails(userDetails);
+      setRecipient(userDetails.phoneNumber);
+    }
+    catch(error){
+      console.log(error)
+    }
+  }
 
   const handleProceed = () => {
-    if (!amount) {
-      Alert.alert("Error", "Please enter the amount.");
+    if (!amount || !recipient) {
+      Alert.alert("Error", "Please enter both recipient and amount.");
+      return;
+    }
+
+    if (!jwtToken) {
+      Alert.alert("Error", "JWT token is missing. Please log in again.");
+      navigation.navigate("Login");
       return;
     }
 
     setLoading(true);
-    axios.post(
-      `${url}/api/transaction/verify-email`,
-      { email: userData.email },
-      {
-        timeout: 10000,
-      }
-    )
-    .then((response) => {
-      if (response.data.exists) {
-        navigation.navigate('MPIN', {
-          amount: amount,
-          recipient: userData.email,
-          fromScreen: 'ScannedSendMoney'
-        });
-      } else {
-        Alert.alert("Error", "Recipient email not found in our system.");
-      }
-    })
-    .catch((error) => {
-      console.error("Email verification error:", error);
-      Alert.alert(
-        "Error",
-        "Failed to verify recipient. Please try again."
-      );
-    })
-    .finally(() => {
+    setTimeout(() => {
       setLoading(false);
-    });
+      navigation.navigate('Mpin', {
+        amount: amount,
+        recipient: recipient,
+        fromScreen: 'SendMoney'
+      });
+    }, 1000);
+    
   };
+  useEffect(()=>{
+    fetchUserDetails();
+  },[])
 
   return (
     <KeyboardAvoidingView 
@@ -88,8 +110,8 @@ const ScannedSendMoney = ({ navigation, route }) => {
             <View style={styles.userIconContainer}>
               <FontAwesome name="user-circle" size={50} color="#2563EB" />
             </View>
-            <Text style={styles.userName}>{userData.name}</Text>
-            <Text style={styles.userEmail}>{userData.email}</Text>
+            <Text style={styles.userName}>{userDetails.firstName} {userDetails.lastName}</Text>
+            <Text style={styles.userEmail}>{userDetails.phoneNumber}</Text>
           </View>
 
           <View style={styles.inputContainer}>

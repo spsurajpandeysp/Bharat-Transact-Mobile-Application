@@ -7,6 +7,6 @@ const authMiddleware = require('../middlewares/auth.middleware')
 Router.get('/balance',authMiddleware.verifyToken,userController.getBalance)
 Router.post('/get-user-by-email',userController.getUserDetailsByEmail)
 Router.get('/get-user-by-JWT',authMiddleware.verifyToken,userController.getUserByJWT)
-
-
+Router.post('/get-user-by-qr-code',userController.getUserDetailsByQrCode)
+Router.post('/get-user-by-phone-number',userController.getUserDetailsByPhoneNumber)
 module.exports = Router
