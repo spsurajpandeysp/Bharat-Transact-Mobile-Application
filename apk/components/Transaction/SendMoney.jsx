@@ -10,7 +10,6 @@ import {
   Dimensions,
   KeyboardAvoidingView,
   Platform,
-  ScrollView
 } from "react-native";
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from "@react-native-async-storage/async-storage";

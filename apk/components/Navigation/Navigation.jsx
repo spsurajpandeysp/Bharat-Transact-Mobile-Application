@@ -20,6 +20,7 @@ import BankTransfer from '../bankTransfer/BankTransfer';
 import PayBills from '../payBills/PayBills';
 import BillPaymentForm from '../payBills/BillPaymentForm';
 import Support from '../support/Support';
+import MpinCreate from '../Transaction/MpinCreate';
 const Stack = createStackNavigator();
 
 export default function Navigation() {
@@ -44,6 +45,7 @@ export default function Navigation() {
       <Stack.Screen name="PayBills" component={PayBills} options={{headerShown: false}} />
       <Stack.Screen name='BillPaymentForm' component={BillPaymentForm} options={{headerShown:false}}/>
       <Stack.Screen name='Support' component={Support} options={{headerShown:false}}/>
+      <Stack.Screen name="MpinCreate" component={MpinCreate} options={{headerShown:false}}/>
       
     </Stack.Navigator>
   );

@@ -6,7 +6,6 @@ import { FontAwesome } from '@expo/vector-icons';
 const { width, height } = Dimensions.get('window');
 
 const TransactionSuccessfull = ({ navigation, route }) => {
-  // Example data, replace with route.params or props as needed
   const amount = route?.params?.amount || '1225';
   const date = route?.params?.date || '31 Dec 2023';
   const details = route?.params?.details || 'Residential';

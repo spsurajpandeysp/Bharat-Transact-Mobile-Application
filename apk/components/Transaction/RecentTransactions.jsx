@@ -58,6 +58,8 @@ const RecentTransactions = ({ navigation }) => {
         },
       });
       if (response.data && response.data.transactions) {
+        // Log the transactions to verify the data
+        console.log('Fetched transactions:', response.data.transactions);
         const reversedTransactions = response.data.transactions.reverse();
         setTransactions(reversedTransactions);
       }
@@ -81,40 +83,34 @@ const RecentTransactions = ({ navigation }) => {
     fetchTransactions();
   };
 
-  const getTransactionIcon = (type) => {
-    switch (type) {
-      case 'credit':
+  const getTransactionIcon = (direction) => {
+    switch (direction) {
+      case 'incoming':
         return 'arrow-downward';
-      case 'debit':
+      case 'outgoing':
         return 'arrow-upward';
-      case 'bank_transfer':
-        return 'account-balance';
       default:
         return 'swap-horiz';
     }
   };
 
-  const getTransactionColor = (type) => {
-    switch (type) {
-      case 'credit':
+  const getTransactionColor = (direction) => {
+    switch (direction) {
+      case 'incoming':
         return '#4CAF50';
-      case 'debit':
+      case 'outgoing':
         return '#F44336';
-      case 'bank_transfer':
-        return '#1F41B1';
       default:
         return '#1F41B1';
     }
   };
 
-  const getTransactionType = (type) => {
-    switch (type) {
-      case 'credit':
+  const getTransactionType = (direction) => {
+    switch (direction) {
+      case 'incoming':
         return 'Received';
-      case 'debit':
+      case 'outgoing':
         return 'Sent';
-      case 'bank_transfer':
-        return 'Bank Transfer';
       default:
         return 'Transaction';
     }
@@ -122,39 +118,76 @@ const RecentTransactions = ({ navigation }) => {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
+    const istFormatterDate = new Intl.DateTimeFormat('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
 
-    if (date.toDateString() === today.toDateString()) {
-      return 'Today';
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return 'Yesterday';
-    } else {
-      return date.toLocaleDateString('en-US', {
+    const istFormatterTime = new Intl.DateTimeFormat('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+    const istDate = new Date(
+      new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Kolkata',
+        year: 'numeric',
+        month: 'numeric',
         day: 'numeric',
-        month: 'short',
-        year: 'numeric'
-      });
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        hour12: false,
+      }).formatToParts(date).reduce((acc, part) => {
+        if (part.type !== 'literal') acc[part.type] = part.value;
+        return acc;
+      }, {})
+    );
+    const now = new Date();
+    const todayIST = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+    const yesterdayIST = new Date(todayIST);
+    yesterdayIST.setDate(todayIST.getDate() - 1);
+
+    const isSameDay = (d1, d2) => d1.toDateString() === d2.toDateString();
+
+    const timeString = istFormatterTime.format(date);
+    const dateStringFormatted = istFormatterDate.format(date);
+
+    if (isSameDay(istDate, todayIST)) {
+      return `Today at ${timeString}`;
+    } else if (isSameDay(istDate, yesterdayIST)) {
+      return `Yesterday at ${timeString}`;
+    } else {
+      return `${dateStringFormatted} at ${timeString}`;
     }
   };
+
 
   const renderTransactionItem = ({ item }) => (
     <TouchableOpacity 
       style={styles.transactionItem}
-      onPress={() => navigation.navigate('TransactionDetails', { transaction: item })}
+      // onPress={() => navigation.navigate('TransactionDetails', { transaction: item })}
     >
-      <View style={[styles.transactionIcon, { backgroundColor: `${getTransactionColor(item.type)}15` }]}>
+      <View style={[styles.transactionIcon, { backgroundColor: `${getTransactionColor(item.direction)}15` }]}>
         <MaterialIcons 
-          name={getTransactionIcon(item.type)} 
+          name={getTransactionIcon(item.direction)} 
           size={24} 
-          color={getTransactionColor(item.type)} 
+          color={getTransactionColor(item.direction)} 
         />
       </View>
       <View style={styles.transactionDetails}>
         <Text style={styles.transactionType}>
-          {getTransactionType(item.type)}
+          {getTransactionType(item.direction)}
         </Text>
+        <Text style={styles.transactionDate}>Transaction Id: {item.transactionId}</Text>
+        {item.direction === 'incoming' ? (
+          <Text style={styles.transactionDate}>From: {item.fromUser.firstName} {item.fromUser.lastName}</Text>
+        ) : (
+          <Text style={styles.transactionDate}>To: {item.toUser.firstName} {item.toUser.lastName}</Text>
+        )}
         <Text style={styles.transactionDate}>
           {formatDate(item.createdAt)}
         </Text>
@@ -162,9 +195,9 @@ const RecentTransactions = ({ navigation }) => {
       <View style={styles.amountContainer}>
         <Text style={[
           styles.transactionAmount,
-          { color: getTransactionColor(item.type) }
+          { color: getTransactionColor(item.direction) }
         ]}>
-          {item.type === 'credit' ? '+' : '-'}₹{item.amount}
+          {item.prefix}₹{item.amount}
         </Text>
         <MaterialIcons name="chevron-right" size={20} color="#999" />
       </View>

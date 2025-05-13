@@ -114,7 +114,7 @@ const getTransactionHistory = async (req, res) => {
         fromUser: transaction.fromUser,
         toUser: transaction.toUser,
         status: transaction.status,
-        createdAt: transaction.createdAt,
+        createdAt: transaction.date,
       };
     });
 
