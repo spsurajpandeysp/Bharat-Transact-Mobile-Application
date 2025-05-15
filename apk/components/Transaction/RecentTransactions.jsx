@@ -117,47 +117,22 @@ const RecentTransactions = ({ navigation }) => {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    const istFormatterDate = new Intl.DateTimeFormat('en-IN', {
-      timeZone: 'Asia/Kolkata',
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
-    });
-
-    const istFormatterTime = new Intl.DateTimeFormat('en-IN', {
-      timeZone: 'Asia/Kolkata',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    });
-    const istDate = new Date(
-      new Intl.DateTimeFormat('en-US', {
-        timeZone: 'Asia/Kolkata',
-        year: 'numeric',
-        month: 'numeric',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric',
-        hour12: false,
-      }).formatToParts(date).reduce((acc, part) => {
-        if (part.type !== 'literal') acc[part.type] = part.value;
-        return acc;
-      }, {})
-    );
     const now = new Date();
-    const todayIST = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-    const yesterdayIST = new Date(todayIST);
-    yesterdayIST.setDate(todayIST.getDate() - 1);
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
 
-    const isSameDay = (d1, d2) => d1.toDateString() === d2.toDateString();
+    const isToday = date.toDateString() === now.toDateString();
+    const isYesterday = date.toDateString() === yesterday.toDateString();
 
-    const timeString = istFormatterTime.format(date);
-    const dateStringFormatted = istFormatterDate.format(date);
+    const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: true };
+    const dateOptions = { day: 'numeric', month: 'short', year: 'numeric' };
 
-    if (isSameDay(istDate, todayIST)) {
+    const timeString = date.toLocaleTimeString('en-US', timeOptions);
+    const dateStringFormatted = date.toLocaleDateString('en-US', dateOptions);
+
+    if (isToday) {
       return `Today at ${timeString}`;
-    } else if (isSameDay(istDate, yesterdayIST)) {
+    } else if (isYesterday) {
       return `Yesterday at ${timeString}`;
     } else {
       return `${dateStringFormatted} at ${timeString}`;

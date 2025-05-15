@@ -10,6 +10,6 @@ router.post("/phone-verify",authController.phoneVerify)
 router.post("/forget-password",authController.forgetPasword)
 router.post("/resend-phone-verify-otp",authController.resendSendPhoneVerifyOtp)
 router.post("/reset-password",authController.resetPassword)
-
+router.post("/create-mpin",authController.authMiddleware,authController.createMpin)
 
 module.exports = router

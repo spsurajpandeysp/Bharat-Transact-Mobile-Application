@@ -96,14 +96,13 @@ const getTransactionHistory = async (req, res) => {
     const transactions = await Transaction.find({
       $or: [{ fromUser: userId }, { toUser: userId }]
     })
-      .populate('fromUser', 'firstName lastName email') // Populate selected fields
+      .populate('fromUser', 'firstName lastName email') 
       .populate('toUser', 'firstName lastName email');
 
     if (transactions.length === 0) {
       return res.status(404).json({ message: "No transactions found." });
     }
 
-    // Transform transactions for response
     const modifiedTransactions = transactions.map(transaction => {
       const isOutgoing = transaction.fromUser._id.toString() === userId;
       return {

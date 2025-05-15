@@ -4,14 +4,33 @@ import { OtpInput } from "react-native-otp-entry";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { LinearGradient } from 'expo-linear-gradient';
 const {height,width}=Dimensions.get('window');
+import axios from 'axios';
+const { url_api } = require("../../impUrl");
 export default function MpinCreate() {
   const [loading, setLoading] = useState(false);
   const [mpin, setMpin] = useState("");
+  const [confirmMpin,setConfirmMpin]=useState("");
+
+  const createMpin=async()=>{
+    try{
+        const response=await axios.post(`${url_api}/create-mpin`,{mpin,confirmMpin},{headers:{Authorization:`Bearer ${token}`}});
+        console.log("kya aaya response",response.data);
+        navigation.navigate("Login");
+    }
+    catch(error){
+        console.log("kya aaya error",error);
+    }
+  }
   const handleVerifyMpin=async () =>{
     if(!mpin || mpin.length !==4){
         Alert.alert("Error","Please enter a valid 4-digit MPIN");
         return;
     }
+    if(mpin !== confirmMpin){
+        Alert.alert("Error","Passwords do not match");
+        return;
+    }
+    createMpin();
 
   }
   return (
@@ -32,7 +51,7 @@ export default function MpinCreate() {
 
             <View style={styles.content}>
                 <View style={styles.mpinSection}>
-                    <Text style={styles.mpinLabel}>Enter Your Transaction Pin</Text>
+                    <Text style={styles.mpinLabel}>Create Your Transaction Pin</Text>
                     <OtpInput
                         numberOfDigits={4}
                         focusColor="#2563EB"
@@ -56,8 +75,31 @@ export default function MpinCreate() {
                             disabledPinCodeContainerStyle: styles.disabledPinCodeContainer,
                         }}
                     />
-                </View>
-
+                    <Text style={styles.mpinLabel}>Re-enter Your Transaction Pin</Text>
+                    <OtpInput
+                        numberOfDigits={4}
+                        focusColor="#2563EB"
+                        autoFocus={true}
+                        hideStick={true}
+                        blurOnFilled={true}
+                        disabled={false}
+                        type="numeric"
+                        secureTextEntry={true}
+                        focusStickBlinkingDuration={500}
+                        onFilled={(text) => setMpin(text)}
+                        textInputProps={{
+                            accessibilityLabel: "One-Time Password",
+                        }}
+                        theme={{
+                            containerStyle: styles.otpContainer,
+                            pinCodeContainerStyle: styles.pinCodeContainer,
+                            focusStickStyle: styles.focusStick,
+                            focusedPinCodeContainerStyle: styles.activePinCodeContainer,
+                            filledPinCodeContainerStyle: styles.filledPinCodeContainer,
+                            disabledPinCodeContainerStyle: styles.disabledPinCodeContainer,
+                        }}
+                        />
+                        </View>
                 <TouchableOpacity 
                     style={[styles.submitBtn, loading && styles.submitBtnDisabled]}
                     onPress={handleVerifyMpin}
