@@ -58,6 +58,7 @@ const RecentTransactions = ({ navigation }) => {
         },
       });
       if (response.data && response.data.transactions) {
+        console.log('Fetched transactions:', response.data.transactions);
         const reversedTransactions = response.data.transactions.reverse();
         setTransactions(reversedTransactions);
       }
@@ -81,40 +82,34 @@ const RecentTransactions = ({ navigation }) => {
     fetchTransactions();
   };
 
-  const getTransactionIcon = (type) => {
-    switch (type) {
-      case 'credit':
+  const getTransactionIcon = (direction) => {
+    switch (direction) {
+      case 'incoming':
         return 'arrow-downward';
-      case 'debit':
+      case 'outgoing':
         return 'arrow-upward';
-      case 'bank_transfer':
-        return 'account-balance';
       default:
         return 'swap-horiz';
     }
   };
 
-  const getTransactionColor = (type) => {
-    switch (type) {
-      case 'credit':
+  const getTransactionColor = (direction) => {
+    switch (direction) {
+      case 'incoming':
         return '#4CAF50';
-      case 'debit':
+      case 'outgoing':
         return '#F44336';
-      case 'bank_transfer':
-        return '#1F41B1';
       default:
         return '#1F41B1';
     }
   };
 
-  const getTransactionType = (type) => {
-    switch (type) {
-      case 'credit':
+  const getTransactionType = (direction) => {
+    switch (direction) {
+      case 'incoming':
         return 'Received';
-      case 'debit':
+      case 'outgoing':
         return 'Sent';
-      case 'bank_transfer':
-        return 'Bank Transfer';
       default:
         return 'Transaction';
     }
@@ -122,39 +117,51 @@ const RecentTransactions = ({ navigation }) => {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
+    const now = new Date();
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
 
-    if (date.toDateString() === today.toDateString()) {
-      return 'Today';
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return 'Yesterday';
+    const isToday = date.toDateString() === now.toDateString();
+    const isYesterday = date.toDateString() === yesterday.toDateString();
+
+    const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: true };
+    const dateOptions = { day: 'numeric', month: 'short', year: 'numeric' };
+
+    const timeString = date.toLocaleTimeString('en-US', timeOptions);
+    const dateStringFormatted = date.toLocaleDateString('en-US', dateOptions);
+
+    if (isToday) {
+      return `Today at ${timeString}`;
+    } else if (isYesterday) {
+      return `Yesterday at ${timeString}`;
     } else {
-      return date.toLocaleDateString('en-US', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
-      });
+      return `${dateStringFormatted} at ${timeString}`;
     }
   };
+
 
   const renderTransactionItem = ({ item }) => (
     <TouchableOpacity 
       style={styles.transactionItem}
-      onPress={() => navigation.navigate('TransactionDetails', { transaction: item })}
+      // onPress={() => navigation.navigate('TransactionDetails', { transaction: item })}
     >
-      <View style={[styles.transactionIcon, { backgroundColor: `${getTransactionColor(item.type)}15` }]}>
+      <View style={[styles.transactionIcon, { backgroundColor: `${getTransactionColor(item.direction)}15` }]}>
         <MaterialIcons 
-          name={getTransactionIcon(item.type)} 
+          name={getTransactionIcon(item.direction)} 
           size={24} 
-          color={getTransactionColor(item.type)} 
+          color={getTransactionColor(item.direction)} 
         />
       </View>
       <View style={styles.transactionDetails}>
         <Text style={styles.transactionType}>
-          {getTransactionType(item.type)}
+          {getTransactionType(item.direction)}
         </Text>
+        <Text style={styles.transactionDate}>Transaction Id: {item.transactionId}</Text>
+        {item.direction === 'incoming' ? (
+          <Text style={styles.transactionDate}>From: {item.fromUser.firstName} {item.fromUser.lastName}</Text>
+        ) : (
+          <Text style={styles.transactionDate}>To: {item.toUser.firstName} {item.toUser.lastName}</Text>
+        )}
         <Text style={styles.transactionDate}>
           {formatDate(item.createdAt)}
         </Text>
@@ -162,9 +169,9 @@ const RecentTransactions = ({ navigation }) => {
       <View style={styles.amountContainer}>
         <Text style={[
           styles.transactionAmount,
-          { color: getTransactionColor(item.type) }
+          { color: getTransactionColor(item.direction) }
         ]}>
-          {item.type === 'credit' ? '+' : '-'}₹{item.amount}
+          {item.prefix}₹{item.amount}
         </Text>
         <MaterialIcons name="chevron-right" size={20} color="#999" />
       </View>

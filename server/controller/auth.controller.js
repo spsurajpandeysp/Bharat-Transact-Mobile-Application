@@ -1,4 +1,3 @@
-const nodemailer = require('nodemailer')
 const bcrypt = require('bcrypt')
 const jwt = require ('jsonwebtoken')
 const {User} = require('../models/user.model')
@@ -59,7 +58,6 @@ const getUserDetails = async(req,res) =>{
 
 
 const userLogin = async (req, res) => {
-
     const { phoneNumber, password } = req.body;
 
     if (!phoneNumber || !password) {  
@@ -81,12 +79,33 @@ const userLogin = async (req, res) => {
             return res.status(401).json({ message: "Invalid credentials." });
         }
 
-        const token = jwt.sign({ userId: user._id }, "suraj@321");
-        res.status(200).json({ message: "Login successful.", token });
+        const token = jwt.sign({ userId: user._id }, "suraj@321", { expiresIn: '24h' });
+        res.status(200).json({ 
+            message: "Login successful.", 
+            token,
+            userId: user._id 
+        });
     } catch (error) {
         res.status(500).json({ message: "Error logging in.", error });  
     }
 }
+
+// Add auth middleware
+const authMiddleware = async (req, res, next) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        
+        if (!token) {
+            return res.status(401).json({ message: "Authentication required" });
+        }
+
+        const decoded = jwt.verify(token, "suraj@321");
+        req.user = decoded;
+        next();
+    } catch (error) {
+        return res.status(401).json({ message: "Invalid or expired token" });
+    }
+};
 
   const resendSendPhoneVerifyOtp = async (req, res) =>    {
 
@@ -300,5 +319,22 @@ const getAllUsers= async(req,res)=>{
     res.status(500).json({ message: "Error Fetching user Details", error });
   }
 }
-
-module.exports={userLogin,getUserDetails,resetPassword,forgetPasword,phoneVerify,UserSignUp,getAllUsers,resendSendPhoneVerifyOtp}
+const createMpin = async(req,res)=>{
+  try{
+    const {mpin,confirmMpin} = req.body;
+    if(!mpin || !confirmMpin){
+      return res.status(400).json({message:"All fields are required"})
+    }
+    if(mpin !== confirmMpin){
+      return res.status(400).json({message:"Passwords do not match"})
+    }
+    // const hashedMpin = await bcrypt.hash(mpin,10);
+    const user = await User.findByIdAndUpdate(req.user.userId,{mpin:mpin},{new:true});
+    res.status(200).json({message:"Mpin created successfully"})
+  }
+  catch(error){
+    res.status(500).json({message:"Error creating mpin",error})
+  }
+  
+}
+module.exports={userLogin,getUserDetails,resetPassword,forgetPasword,phoneVerify,UserSignUp,getAllUsers,resendSendPhoneVerifyOtp,createMpin,authMiddleware}

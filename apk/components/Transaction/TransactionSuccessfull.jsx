@@ -1,12 +1,15 @@
-import React from 'react';
+import React, { useEffect,useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FontAwesome } from '@expo/vector-icons';
-
+import axios from 'axios';
+const { url_api } = require("../../impUrl");
 const { width, height } = Dimensions.get('window');
 
 const TransactionSuccessfull = ({ navigation, route }) => {
-  // Example data, replace with route.params or props as needed
+  console.log("dekhe kya hai route mei",route?.params)
+  const [userDetails,setUserDetails]=useState(null)
+
   const amount = route?.params?.amount || '1225';
   const date = route?.params?.date || '31 Dec 2023';
   const details = route?.params?.details || 'Residential';
@@ -15,7 +18,68 @@ const TransactionSuccessfull = ({ navigation, route }) => {
   const totalPayment = route?.params?.totalPayment || '1200';
   const tax = route?.params?.tax || '25';
   const total = route?.params?.total || amount;
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const istFormatterDate = new Intl.DateTimeFormat('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
 
+    const istFormatterTime = new Intl.DateTimeFormat('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+    const istDate = new Date(
+      new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Kolkata',
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        hour12: false,
+      }).formatToParts(date).reduce((acc, part) => {
+        if (part.type !== 'literal') acc[part.type] = part.value;
+        return acc;
+      }, {})
+    );
+    const now = new Date();
+    const todayIST = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+    const yesterdayIST = new Date(todayIST);
+    yesterdayIST.setDate(todayIST.getDate() - 1);
+
+    const isSameDay = (d1, d2) => d1.toDateString() === d2.toDateString();
+
+    const timeString = istFormatterTime.format(date);
+    const dateStringFormatted = istFormatterDate.format(date);
+
+    if (isSameDay(istDate, todayIST)) {
+      return `Today at ${timeString}`;
+    } else if (isSameDay(istDate, yesterdayIST)) {
+      return `Yesterday at ${timeString}`;
+    } else {
+      return `${dateStringFormatted} at ${timeString}`;
+    }
+  };
+
+  const fetchUserDetails=async()=>{
+    try{
+      const response=await axios.post(`${url_api}/api/user/get-user-by-phone-number`,{phoneNumber:route?.params?.recipient});
+      console.log("response",response.data)
+      setUserDetails(response.data.userDetails)
+    }
+    catch(error){
+      console.log(error)
+    }
+  }
+  useEffect(()=>{
+    fetchUserDetails()
+  },[])
   return (
     <View style={styles.bg}>
       <View style={styles.headerRow}>
@@ -37,28 +101,24 @@ const TransactionSuccessfull = ({ navigation, route }) => {
           <View style={styles.detailsSection}>
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Date</Text>
-              <Text style={styles.detailValue}>{date}</Text>
+              <Text style={styles.detailValue}>{formatDate(userDetails?.date)}</Text>
             </View>
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Details</Text>
-              <Text style={styles.detailValue}>{details}</Text>
+              <Text style={styles.detailLabel}>Name</Text>
+              <Text style={styles.detailValue}>{userDetails?.firstName} {userDetails?.lastName}</Text>
             </View>
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Reference num</Text>
-              <Text style={styles.detailValue}>{reference}</Text>
+              <Text style={styles.detailLabel}>Phone number</Text>
+              <Text style={styles.detailValue}>{userDetails?.phoneNumber}</Text>
             </View>
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Account</Text>
-              <Text style={styles.detailValue}>{account}</Text>
+              <Text style={styles.detailLabel}>Transaction ID</Text>
+              <Text style={styles.detailValue}>{userDetails?.transactionId}</Text>
             </View>
             <View style={styles.divider} />
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Total Payment</Text>
-              <Text style={styles.detailValue}>₹{totalPayment}</Text>
-            </View>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Tax</Text>
-              <Text style={styles.detailValue}>₹{tax}</Text>
+              <Text style={styles.detailLabel}>Status</Text>
+              <Text style={styles.detailValue}>{userDetails?.status}</Text>
             </View>
             <View style={styles.detailRow}>
               <Text style={styles.detailLabelBold}>Total</Text>

@@ -1,64 +1,40 @@
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator,Platform,KeyboardAvoidingView } from 'react-native'
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StyleSheet,Alert, Text, View, KeyboardAvoidingView, Platform, TouchableOpacity, ActivityIndicator,Dimensions } from 'react-native'
 import React, { useState } from 'react'
 import { OtpInput } from "react-native-otp-entry";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { LinearGradient } from 'expo-linear-gradient';
 const {height,width}=Dimensions.get('window');
-import { url_api } from '../../impUrl';
-export default function Mpin({ navigation, route }) {
-    const [loading, setLoading] = useState(false);
-    const [mpin, setMpin] = useState("");
+import axios from 'axios';
+const { url_api } = require("../../impUrl");
+export default function MpinCreate() {
+  const [loading, setLoading] = useState(false);
+  const [mpin, setMpin] = useState("");
+  const [confirmMpin,setConfirmMpin]=useState("");
 
-    const handleVerifyMpin = async () => {
-        if (!mpin || mpin.length !== 4) {
-            Alert.alert("Error", "Please enter a valid 4-digit MPIN.");
-            return;
-        }
+  const createMpin=async()=>{
+    try{
+        const response=await axios.post(`${url_api}/create-mpin`,{mpin,confirmMpin},{headers:{Authorization:`Bearer ${token}`}});
+        console.log("kya aaya response",response.data);
+        navigation.navigate("Login");
+    }
+    catch(error){
+        console.log("kya aaya error",error);
+    }
+  }
+  const handleVerifyMpin=async () =>{
+    if(!mpin || mpin.length !==4){
+        Alert.alert("Error","Please enter a valid 4-digit MPIN");
+        return;
+    }
+    if(mpin !== confirmMpin){
+        Alert.alert("Error","Passwords do not match");
+        return;
+    }
+    createMpin();
 
-        setLoading(true);
-        try {
-            const token = await AsyncStorage.getItem('jwt_token');
-            console.log("token", token);
-            console.log(route.params.recipient, route.params.amount, mpin);
-
-            const response = await axios.post(`${url_api}/api/transaction/send-money`, 
-            {
-                recipient: route.params.recipient,
-                amount: route.params.amount,
-                mpin: mpin,
-            }, 
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-                timeout: 20000, 
-            });
-
-            console.log("response", response);
-            if (response.status === 200) {
-                navigation.navigate('TransactionSuccessfull', {
-                    amount: route.params.amount,
-                    recipient: route.params.recipient,
-                });
-            } else {
-                const errorMessage = response.data.message || "Transaction failed.";
-                console.log("Error:", errorMessage);
-                Alert.alert("Error", errorMessage);
-            }
-        } catch (error) {
-            const errorMessage = error.response?.data?.message || "An unexpected error occurred during the transaction.";
-            console.error("Transaction error:", errorMessage);
-            Alert.alert("Transaction Error", errorMessage);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    return (
-        <KeyboardAvoidingView 
+  }
+  return (
+    <KeyboardAvoidingView 
               behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
               style={styles.container}
             >
@@ -69,24 +45,13 @@ export default function Mpin({ navigation, route }) {
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                     <FontAwesome name="arrow-left" size={20} color="#fff" />
                 </TouchableOpacity>
-                <Text style={styles.headerText}>Enter MPIN</Text>
+                <Text style={styles.headerText}>Create MPIN</Text>
                 <View style={styles.placeholder} />
             </LinearGradient>
 
             <View style={styles.content}>
-                <View style={styles.transactionInfo}>
-                    <View style={styles.amountRow}>
-                        <Text style={styles.amountLabel}>Amount:</Text>
-                        <Text style={styles.amountValue}>₹{route.params?.amount || '0.00'}</Text>
-                    </View>
-                    <View style={styles.recipientRow}>
-                        <Text style={styles.recipientLabel}>To:</Text>
-                        <Text style={styles.recipientValue}>{route.params?.recipient || 'N/A'}</Text>
-                    </View>
-                </View>
-
                 <View style={styles.mpinSection}>
-                    <Text style={styles.mpinLabel}>Enter Your Transaction Pin</Text>
+                    <Text style={styles.mpinLabel}>Create Your Transaction Pin</Text>
                     <OtpInput
                         numberOfDigits={4}
                         focusColor="#2563EB"
@@ -110,8 +75,31 @@ export default function Mpin({ navigation, route }) {
                             disabledPinCodeContainerStyle: styles.disabledPinCodeContainer,
                         }}
                     />
-                </View>
-
+                    <Text style={styles.mpinLabel}>Re-enter Your Transaction Pin</Text>
+                    <OtpInput
+                        numberOfDigits={4}
+                        focusColor="#2563EB"
+                        autoFocus={true}
+                        hideStick={true}
+                        blurOnFilled={true}
+                        disabled={false}
+                        type="numeric"
+                        secureTextEntry={true}
+                        focusStickBlinkingDuration={500}
+                        onFilled={(text) => setMpin(text)}
+                        textInputProps={{
+                            accessibilityLabel: "One-Time Password",
+                        }}
+                        theme={{
+                            containerStyle: styles.otpContainer,
+                            pinCodeContainerStyle: styles.pinCodeContainer,
+                            focusStickStyle: styles.focusStick,
+                            focusedPinCodeContainerStyle: styles.activePinCodeContainer,
+                            filledPinCodeContainerStyle: styles.filledPinCodeContainer,
+                            disabledPinCodeContainerStyle: styles.disabledPinCodeContainer,
+                        }}
+                        />
+                        </View>
                 <TouchableOpacity 
                     style={[styles.submitBtn, loading && styles.submitBtnDisabled]}
                     onPress={handleVerifyMpin}
@@ -120,7 +108,7 @@ export default function Mpin({ navigation, route }) {
                     {loading ? (
                         <ActivityIndicator size="small" color="#fff" />
                     ) : (
-                        <Text style={styles.submitBtnText}>Pay Now</Text>
+                        <Text style={styles.submitBtnText}>Create Pin</Text>
                     )}
                 </TouchableOpacity>
             </View>

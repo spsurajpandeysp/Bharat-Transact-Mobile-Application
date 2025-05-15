@@ -13,6 +13,8 @@ const New = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false); 
   const handleSignup = async () => {
     if (!firstName || !lastName || !phoneNumber || !password || !confirmPassword) {
@@ -77,7 +79,7 @@ const New = ({ navigation }) => {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: '#1F41B1' }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
     >
       <ScrollView
@@ -104,7 +106,8 @@ const New = ({ navigation }) => {
             <Text style={styles.headingText}>Sign Up</Text>
             <Text style={styles.subtitle}>Create your account</Text>
             <View style={styles.inputs}>
-              <View style={styles.InputContainer}>
+              <View style={styles.nameContainerBox}>
+              <View style={styles.nameContainer}>
                 <TextInput
                   style={styles.textInput}
                   placeholder="First Name"
@@ -112,13 +115,14 @@ const New = ({ navigation }) => {
                   onChangeText={setFirstName}
                 />
               </View>
-              <View style={styles.InputContainer}>
+              <View style={styles.nameContainer}>
                 <TextInput
                   style={styles.textInput}
                   placeholder="Last Name"
                   value={lastName}
                   onChangeText={setLastName}
                 />
+              </View> 
               </View>
               <View style={styles.InputContainer}>
                 <TextInput
@@ -136,8 +140,11 @@ const New = ({ navigation }) => {
                   placeholder="Password"
                   value={password}
                   onChangeText={setPassword}
-                  secureTextEntry
+                  secureTextEntry={!showPassword}
                 />
+                <TouchableOpacity style={styles.eyeIcon} onPress={()=>setShowPassword((prev)=>!prev)}>
+                  <FontAwesome name={showPassword ? 'eye' : 'eye-slash'} size={20} color="#888" />
+                </TouchableOpacity>
               </View>
               <View style={styles.InputContainer}>
                 <TextInput
@@ -145,8 +152,11 @@ const New = ({ navigation }) => {
                   placeholder="Confirm Password"
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
-                  secureTextEntry
+                  secureTextEntry={!showConfirmPassword}
                 />
+                <TouchableOpacity  style={styles.eyeIcon} onPress={()=>setShowConfirmPassword((prev)=>!prev)}>
+                  <FontAwesome name={showConfirmPassword ?'eye':'eye-slash'} size={20} color="#888"/>
+                </TouchableOpacity>
               </View>
             </View>
             <View style={styles.btns}>
@@ -302,6 +312,28 @@ const styles = StyleSheet.create({
     borderRadius: 9,
     opacity: 0.8,
   },
+  eyeIcon: {
+    position: 'absolute',
+    right: 16,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    height: '100%',
+    zIndex: 2,
+  },
+  nameContainer:{
+    width: '50%',
+    backgroundColor: "#F8FAFC",
+    borderRadius: 12,
+    marginBottom: 15,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  nameContainerBox:{
+    flexDirection:'row',
+    gap:5
+  }
 });
 
 export default New;

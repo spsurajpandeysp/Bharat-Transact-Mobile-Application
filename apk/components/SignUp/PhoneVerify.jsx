@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { ImageBackground, StyleSheet, Text, TouchableOpacity, View, Dimensions, Alert } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, TouchableOpacity, Alert, KeyboardAvoidingView, Platform,ActivityIndicator } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { OtpInput } from "react-native-otp-entry";
-import { Button } from "react-native-paper";
 import axios from "axios";
 import { url_api } from '../../impUrl';
 
@@ -32,7 +31,7 @@ const PhoneVerifyOtp = ({ route, navigation }) => {
     axios.post(`${url}/api/auth/phone-verify`, { phoneNumber, otp })
       .then((response) => {
           Alert.alert("Success", "Phone number verified successfully!");
-          navigation.replace("Login");
+          navigation.replace("MpinCreate");
       })
       .catch((error) => {
         Alert.alert("Error", error.response?.data?.message || "An error occurred during OTP verification.");
@@ -64,156 +63,171 @@ const PhoneVerifyOtp = ({ route, navigation }) => {
   };
 
   return (
-    <ImageBackground source={require('./bgc2.jpg')} style={styles.container}>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <FontAwesome name="arrow-left" size={30} color="#1F41B1" />
+        <FontAwesome name="arrow-left" size={26} color="#1F41B1" />
       </TouchableOpacity>
 
-      <Text style={styles.headingText}>Enter Your Verification Code</Text>
+      <View style={styles.card}>
+        <Text style={styles.headingText}>Check your phone</Text>
+        <Text style={styles.subtitle}>We sent a verification code to {phoneNumber}. Enter the 4-digit code mentioned in the SMS.</Text>
+        
+        <OtpInput
+          numberOfDigits={4}
+          focusColor="#1F41B1"
+          autoFocus={true}
+          hideStick={true}
+          placeholder="*"
+          blurOnFilled={true}
+          disabled={false}
+          type="numeric"
+          secureTextEntry={false}
+          focusStickBlinkingDuration={500}
+          onTextChange={(text) => setOtp(text)}
+          textInputProps={{
+            accessibilityLabel: "One-Time Password",
+          }}
+          theme={{
+            containerStyle: styles.otpContainer,
+            pinCodeContainerStyle: styles.otpBox,
+            pinCodeTextStyle: styles.otpDigit,
+            focusStickStyle: styles.focusStick,
+            focusedPinCodeContainerStyle: styles.otpBoxActive,
+            placeholderTextStyle: styles.placeholderText,
+            filledPinCodeContainerStyle: styles.otpBoxFilled,
+            disabledPinCodeContainerStyle: styles.otpBoxDisabled,
+          }}
+        />
 
-      <View style={styles.content}>
-        <Text style={styles.contentText}>
-          We sent a verification code to your phone number. Enter the 4-digit code mentioned in the SMS.
-        </Text>
-      </View>
-
-      <OtpInput
-        numberOfDigits={4}
-        onTextChange={(text) => setOtp(text)}
-        focusColor="blue"
-        autoFocus={false}
-        hideStick={true}
-        placeholder="*"
-        blurOnFilled={true}
-        disabled={false}
-        type="numeric"
-        secureTextEntry={false}
-        focusStickBlinkingDuration={500}
-        onFilled={submitHandle}
-        textInputProps={{
-          accessibilityLabel: "One-Time Password",
-        }}
-        theme={{
-          containerStyle: styles.otpContainer,
-          pinCodeContainerStyle: styles.pinCodeContainer,
-          pinCodeTextStyle: styles.pinCodeText,
-          focusStickStyle: styles.focusStick,
-          focusedPinCodeContainerStyle: styles.activePinCodeContainer,
-          placeholderTextStyle: styles.placeholderText,
-          filledPinCodeContainerStyle: styles.filledPinCodeContainer,
-          disabledPinCodeContainerStyle: styles.disabledPinCodeContainer,
-        }}
-      />
-
-      <Button
-        mode="contained"
-        style={styles.verifyBtn}
-        onPress={submitHandle}
-        disabled={isSubmitting}
-      >
-        {isSubmitting ? "Verifying..." : "Verify Code"}
-      </Button>
-
-      <View style={styles.reSendContainer}>
-        <Text style={styles.resend}>Haven't received the SMS yet?</Text>
-        <TouchableOpacity onPress={resendHandle} disabled={isResending}>
-          <Text style={styles.resendText}>
-            {isResending ? "Resending..." : "Resend SMS"}
-          </Text>
+        <TouchableOpacity onPress={submitHandle} style={styles.verifyBtn} disabled={isSubmitting}>
+          {isSubmitting ? (
+            <ActivityIndicator size="small" color="white" />
+          ) : (
+            <Text style={styles.verifyBtnText}>Verify Code</Text>
+          )}
         </TouchableOpacity>
+
+        <View style={styles.reSendContainer}>
+          <Text style={styles.resend}>Haven't received the SMS yet? </Text>
+          <TouchableOpacity onPress={resendHandle} disabled={isResending}>
+            <Text style={styles.resendText}>
+              {isResending ? "Resending..." : "Resend SMS"}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </ImageBackground>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "flex-start",
-    alignItems: "center",
-    paddingTop: height * 0.13,
+    backgroundColor: '#1F41B1',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   backButton: {
     position: 'absolute',
-    top: height * 0.09,
+    top: 40,
     left: 20,
-    zIndex: 1,
+    zIndex: 10,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 6,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+  },
+  card: {
+    width: '90%',
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 8,
   },
   headingText: {
-    color: "#1F41B1",
-    fontSize: height * 0.07,
-    fontWeight: "900",
+    color: '#1F41B1',
+    fontSize: 26,
+    fontWeight: '800',
+    alignSelf: 'flex-start',
+    marginBottom: 4,
   },
-  content: {
-    paddingTop: 20,
-    alignItems: 'center',
-  },
-  contentText: {
-    fontSize: height * 0.02,
-    fontWeight: "800",
-    width: width * 0.7,
-    textAlign: 'center',
+  subtitle: {
+    fontSize: 15,
+    color: '#888',
+    alignSelf: 'flex-start',
+    marginBottom: 18,
   },
   otpContainer: {
-    paddingTop: height * 0.04,
-    width: width * 0.8,
-    justifyContent: 'space-evenly',
-    alignItems: 'center',
-  },
-  pinCodeContainer: {
-    width: width * 0.15,
-    height: height * 0.06,
-    backgroundColor: '#fff',
-    borderRadius: 10,
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
-    elevation: 5,
+    marginBottom: 18,
+    gap: 12,
   },
-  pinCodeText: {
-    fontSize: height * 0.04,
-    color: '#000',
+  otpBox: {
+    width: 48,
+    height: 56,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 6,
   },
-  focusStick: {
-    height: 4,
-    backgroundColor: 'blue',
-  },
-  activePinCodeContainer: {
-    borderColor: 'blue',
+  otpBoxActive: {
+    borderColor: '#1F41B1',
     borderWidth: 2,
   },
-  placeholderText: {
-    fontSize: height * 0.04,
-    color: '#b0b0b0',
+  otpBoxFilled: {
+    backgroundColor: '#F1F5F9',
+    borderColor: '#1F41B1',
   },
-  filledPinCodeContainer: {
-    backgroundColor: '#d1f0e3',
+  otpBoxDisabled: {
+    backgroundColor: '#E5E7EB',
+    borderColor: '#E2E8F0',
   },
-  disabledPinCodeContainer: {
-    backgroundColor: '#d1d1d1',
+  otpDigit: {
+    fontSize: 24,
+    color: '#222',
+    fontWeight: '700',
   },
   verifyBtn: {
-    backgroundColor: '#1F41BB',
-    borderRadius: 6,
-    paddingVertical: 12,
-    paddingHorizontal: 50,
-    width: width * 0.8,
-    justifyContent: 'center',
+    width: '100%',
+    backgroundColor: '#1F41B1',
+    borderRadius: 12,
+    padding: 16,
     alignItems: 'center',
+    marginTop: 8,
   },
-  resendContainer: {
-    paddingTop: height * 0.02,
+  verifyBtnText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  reSendContainer: {
+    paddingTop: 12,
     alignItems: 'center',
-    width: width * 0.8,
+    width: '100%',
   },
   resend: {
-    fontSize: height * 0.02,
+    fontSize: 15,
     color: '#000',
   },
   resendText: {
-    color: "#1F41BB",
+    color: '#1F41B1',
     fontWeight: '600',
-    fontSize: height * 0.022,
+    fontSize: 16,
+    marginTop: 2,
   },
 });
 

@@ -1,5 +1,3 @@
-
-
 const {Transaction} = require('../models/transaction.model');
 const { User } = require('../models/user.model');
 
@@ -107,8 +105,6 @@ const getUserDetailsByEmail = async(req,res) =>{
       lastName: user.lastName,
       qrCode:user.qrCode,
       balance:user.balance,
-
-      profilePic: user.profilePic, 
       address: user.address
     };
 
@@ -174,4 +170,64 @@ const getBalance = async (req, res) => {
 };
 
 
-module.exports = {helpUser,updateUserDetails,getBalance,getUserDetailsByEmail,getUserByJWT};
+const getUserDetailsByQrCode = async(req,res)=>{
+  const {qrCode} = req.body;
+  console.log(qrCode)
+  try{
+    const user = await User.findOne({qrCode});
+    console.log(user)
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    const userDetails = {
+      firstName: user.firstName,
+      lastName: user.lastName,
+      qrCode: user.qrCode,
+      phoneNumber: user.phoneNumber
+    };
+
+    res.status(200).json({ message: 'User details fetched successfully!', userDetails });
+  }
+  catch(error){
+    res.status(500).json({message:"Error fetching user details.",error:error.message})
+  }
+}
+
+const getUserDetailsByPhoneNumber = async(req,res)=>{
+  const {phoneNumber} = req.body;
+  console.log(phoneNumber)
+  try{
+    const user = await User.findOne({phoneNumber})
+    if(!user) {
+      return res.status(404).json({message:"User not found."})
+    }
+
+    const id = user._id;
+    const transactions = await Transaction.find({toUser: id})
+    console.log(transactions)
+
+    if(!transactions || transactions.length === 0) {
+      return res.status(404).json({message:"No transactions found for this user."})
+    }
+
+    const latestTransaction = transactions[0]; 
+
+    const userDetails = {
+      firstName: user.firstName,
+      lastName: user.lastName,
+      transactionId: latestTransaction._id,
+      phoneNumber: user.phoneNumber,
+      date: latestTransaction.date,
+      status: latestTransaction.status,
+      amount:latestTransaction.amount
+    }
+
+    res.status(200).json({message:"User details fetched successfully!", userDetails})
+  }
+  catch(error){
+    res.status(500).json({message:"Error fetching user details.", error:error.message})
+  }
+}
+module.exports = {helpUser,updateUserDetails,getBalance,getUserDetailsByEmail,getUserByJWT,getUserDetailsByQrCode,getUserDetailsByPhoneNumber};
