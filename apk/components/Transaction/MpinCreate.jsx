@@ -22,8 +22,8 @@ import axios from 'axios';
 const { url_api } = require("../../impUrl");
 const { height, width } = Dimensions.get('window');
 
-export default function MpinCreate() {
-  const navigation = useNavigation();
+export default function MpinCreate({ navigation }) {
+
   const [loading, setLoading] = useState(false);
   const [mpin, setMpin] = useState("");
   const [confirmMpin, setConfirmMpin] = useState("");
@@ -34,7 +34,8 @@ export default function MpinCreate() {
     // Get token from AsyncStorage when component mounts
     const getToken = async () => {
       try {
-        const userToken = await AsyncStorage.getItem('userToken');
+        const userToken = await AsyncStorage.getItem('jwt_token');
+        console.log("kya aaya userToken",userToken);
         if (userToken) setToken(userToken);
       } catch (error) {
         console.error("Error retrieving token:", error);
@@ -54,23 +55,24 @@ export default function MpinCreate() {
       setErrorMessage("Authentication token missing. Please login again.");
       return;
     }
-    
+    console.log("kya aaya token",token);
     setLoading(true);
     
     try {
       const response = await axios.post(
-        `${url_api}/create-mpin`,
-        { mpin, confirmMpin },
+        `${url_api}/api/auth/create-mpin`,
+        { mpin},
         { headers: { Authorization: `Bearer ${token}` }}
       );
       
       setLoading(false);
       
-      if (response.data && response.data.success) {
+      if (response.data.message=="Mpin created successfully") {
+
         Alert.alert(
           "Success",
           "MPIN created successfully!",
-          [{ text: "OK", onPress: () => navigation.navigate("Login") }]
+          [{ text: "OK", onPress: () => navigation.navigate("Home") }]
         );
       } else {
         setErrorMessage(response.data?.message || "Failed to create MPIN");

@@ -320,6 +320,7 @@ const getAllUsers= async(req,res)=>{
   }
 }
 const createMpin = async(req,res)=>{
+  console.log("kya aaya req",req.body);
   try{
     const {mpin} = req.body;
     if(!mpin){
@@ -333,6 +334,7 @@ const createMpin = async(req,res)=>{
     res.status(200).json({message:"Mpin created successfully"})
   }
   catch(error){
+    console.log("kya aaya error",error);
     res.status(500).json({message:"Error creating mpin",error})
   }
   
