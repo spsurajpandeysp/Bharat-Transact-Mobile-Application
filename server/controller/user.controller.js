@@ -136,9 +136,12 @@ const getUserByJWT = async(req,res) =>{
       lastName: user.lastName,
       qrCode:user.qrCode,
       balance:user.balance,
-      email:user.email,
       profilePic: user.profilePic, 
-      address: user.address
+      address: user.address,
+      phoneNumber: user.phoneNumber,
+      mpin: user.mpin,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
     };
 
     res.status(200).json({ message: 'User details fetched successfully!', userDetails });

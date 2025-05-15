@@ -321,13 +321,13 @@ const getAllUsers= async(req,res)=>{
 }
 const createMpin = async(req,res)=>{
   try{
-    const {mpin,confirmMpin} = req.body;
-    if(!mpin || !confirmMpin){
-      return res.status(400).json({message:"All fields are required"})
+    const {mpin} = req.body;
+    if(!mpin){
+      return res.status(400).json({message:"MPIN is required"})
     }
-    if(mpin !== confirmMpin){
-      return res.status(400).json({message:"Passwords do not match"})
-    }
+    if(mpin.length !== 4){
+      return res.status(400).json({message:"MPIN must be 4 digits"})
+    } 
     // const hashedMpin = await bcrypt.hash(mpin,10);
     const user = await User.findByIdAndUpdate(req.user.userId,{mpin:mpin},{new:true});
     res.status(200).json({message:"Mpin created successfully"})

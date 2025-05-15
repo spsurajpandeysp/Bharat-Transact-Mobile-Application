@@ -43,7 +43,12 @@ const NewHome = ({ navigation }) => {
       const response = await axios.get(`${url_api}/api/user/get-user-by-JWT`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       if (response.data && response.data.userDetails) {
+        console.log(response.data.userDetails);
+        if(response.data.userDetails.mpin==""){
+          navigation.navigate('MpinCreate');
+        }
         setUserData(response.data.userDetails);
       }
     } catch (error) {
