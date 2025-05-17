@@ -98,6 +98,9 @@ export default function Navigation() {
       <Stack.Screen name="Support" component={Support} options={mainScreens.Support} />
       <Stack.Screen name="MpinCreate" component={MpinCreate} options={mainScreens.MpinCreate} />
       <Stack.Screen name="UserDetails" component={UserDetails} options={mainScreens.UserDetails} />
+      <Stack.Screen name="UserDetails" component={UserDetails} options={mainScreens.UserDetails} />
+      <Stack.Screen name="UserDetails" component={UserDetails} options={mainScreens.UserDetails} />
+      <Stack.Screen name="UserDetails" component={UserDetails} options={mainScreens.UserDetails} />
     </Stack.Navigator>
   );
 }

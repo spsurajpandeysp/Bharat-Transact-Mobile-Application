@@ -15,7 +15,6 @@ const userSchema = new mongoose.Schema({
     ifsc : {type:String,default:"BTLN0000646"},
     resetOtp: { type: String },
     resetOtpExpiry: { type: Date },
-    bvdln gndfjlg
   });
   
 const User = mongoose.model("User", userSchema);
