@@ -29,6 +29,7 @@ const EnterAmount = ({ route, navigation }) => {
     });
   };
 
+  "abcdefghijklmnopqrstuvwxyz"
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
