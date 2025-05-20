@@ -29,7 +29,6 @@ const EnterAmount = ({ route, navigation }) => {
     });
   };
 
-  "abcdefghijklmnopqrstuvwxyz"
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -91,6 +90,9 @@ const EnterAmount = ({ route, navigation }) => {
       >
         <Text style={styles.continueButtonText}>Continue</Text>
       </TouchableOpacity>
+      <View>
+        <Text>Exit</Text>
+      </View>
     </KeyboardAvoidingView>
   );
 };
