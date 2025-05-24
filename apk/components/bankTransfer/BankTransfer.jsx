@@ -33,10 +33,13 @@ const BankTransfer = ({ navigation }) => {
   const fetchSavedAccounts = async () => {
     try {
       const token = await AsyncStorage.getItem('jwt_token');
-      const response = await axios.get(`${url_api}/api/user/saved-accounts`, {
+      const response = await axios.post(`${url_api}/api/transaction/verify-account-details`, {accountNumber,ifscCode,accountHolderName} ,{
         headers: { Authorization: `Bearer ${token}` }
       });
       setSavedAccounts(response.data.accounts || []);
+      navigation.navigate('BankTransferMpin', {
+        savedAccounts: {accountNumber,ifscCode,accountHolderName} || []
+      });
     } catch (error) {
       console.error('Error fetching saved accounts:', error);
     }

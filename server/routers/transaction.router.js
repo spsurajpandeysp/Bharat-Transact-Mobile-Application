@@ -7,5 +7,6 @@ router.get('/',transactionController.getAllTransactionHistory)
 router.get('/user',authMiddleware.verifyToken,transactionController.getTransactionHistory)
 router.post('/send-money',authMiddleware.verifyToken,transactionController.sendMoney)
 router.post('/bank-transfer',authMiddleware.verifyToken,transactionController.bankTransfer)
+router.post('/verify-account-details',authMiddleware.verifyToken,transactionController.verifyAccountDetails)
 
 module.exports = router

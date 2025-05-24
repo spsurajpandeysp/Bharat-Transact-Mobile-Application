@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
     isPhoneVerified: { type: Boolean, default: false },
     otp: { type: String },
     otpExpiry: { type: Date },
-    ifsc : {type:String,default:"BTL0000646"},
+    ifsc : {type:String,default:"BTLN0000646"},
     resetOtp: { type: String },
     resetOtpExpiry: { type: Date },
   });

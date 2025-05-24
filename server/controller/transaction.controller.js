@@ -229,8 +229,42 @@ const bankTransfer = async (req, res) => {
 
 
 
+const verifyAccountDetails = async (req, res) => {
+  try {
+    const { accountNumber, ifscCode, accountHolderName } = req.body;
+    const { userId } = req.user;
+
+    if (!userId || !accountNumber || !ifscCode || !accountHolderName) {
+      return res.status(400).json({ message: "Invalid input. or Required All Fields" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(400).json({ message: "User not found." });
+    }
+
+    if (user.accountNumber != accountNumber) {
+      return res.status(400).json({ message: "Invalid Account Number." });
+    }
+
+    if (user.ifsc != ifscCode) {
+      return res.status(400).json({ message: "Invalid IFSC Code." });
+    }
+
+    if (user.firstName.toLowerCase()+" "+user.lastName.toLowerCase() != accountHolderName.toLowerCase()) {
+      return res.status(400).json({ message: "Invalid Account Holder Name." });
+    }
+
+    if(user.accountNumber == accountNumber){
+      return res.status(400).json({ message: "You can't send money in your own account." });
+    }
+
+    return res.status(200).json({ message: "Account Details Verified." });
+  } catch (error) {
+    return res.status(500).json({ message: "An error occurred while verifying account details.", error: error.message });
+  }
+}
 
 
 
-
-module.exports={sendMoney,getTransactionHistory,getAllTransactionHistory,bankTransfer}
+module.exports={sendMoney,getTransactionHistory,getAllTransactionHistory,bankTransfer,verifyAccountDetails}
