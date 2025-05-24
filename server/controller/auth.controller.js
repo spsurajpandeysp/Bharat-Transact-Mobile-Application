@@ -16,12 +16,10 @@ const createUniqueAccount = async (name) => {
     let formattedTransactionId;
   
     while (accountExists) {
-      accountNumber = generateAccountNumber();
-      formattedTransactionId = `${accountNumber}@bht`;
+      accountNumber = Math.floor(10000000000 + Math.random() * 90000000000).toString(); // Generates an 11-digit number
+      formattedTransactionId = `${accountNumber}`;
 
- 
       const existingUser = await User.findOne({ formattedTransactionId });
-  
 
       if (!existingUser) {
         accountExists = false;
@@ -29,7 +27,6 @@ const createUniqueAccount = async (name) => {
     }
   
     return formattedTransactionId;
-    
 };
 
 
@@ -189,13 +186,15 @@ const UserSignUp = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         const formattedTransactionId = await createUniqueAccount();
 
+        console.log("formattedTransactionId",formattedTransactionId)
+
         console.log("fds")
         const newUser = new User({
             firstName,
             lastName,
             phoneNumber,
             password: hashedPassword,
-            // bharactTransactionId: formattedTransactionId,
+            bharactTransactionId: formattedTransactionId,
             otp:otp,
             otpExpiry
         
