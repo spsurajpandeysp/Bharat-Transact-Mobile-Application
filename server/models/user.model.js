@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
     password: { type: String, required: true },
     qrCode: { type: String, default: () => `QR-${uuidv4()}` },
     mpin: { type: String,default:null,default:"" },
-    bharactTransactionId: { type: String, required: true, unique: true },
+    accountNumber: { type: String, required: true, unique: true },
     balance: { type: Number,default:10000 },
     isPhoneVerified: { type: Boolean, default: false },
     otp: { type: String },

@@ -140,8 +140,97 @@ const getAllTransactionHistory = async(req,res) => {
 }
 
 
+const bankTransfer = async (req, res) => {
+  const { accountNumber, ifscCode, accountHolderName, amount,mpin } = req.body;
+  const { userId } = req.user;
+  console.log("sendMoney",accountNumber, ifscCode, accountHolderName, amount,mpin)
+
+  if (!userId || !accountNumber || !ifscCode || !accountHolderName || !amount || amount <= 0 || !mpin) {
+      return res.status(400).json({ message: "Invalid input. or Required All Fields" });
+  }
+
+  if(mpin){
+    const user = await User.findById(userId);
+    if(!user){
+      return res.status(400).json({ message: "User not found." });
+    }
+    if(user.mpin !== mpin){ 
+      return res.status(400).json({ message: "Invalid MPIN." });
+    }
+  }
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+     
+      const fromAccount = await User.findById(userId).session(session);
+      const toAccount = await User.findOne({ accountNumber: accountNumber }).session(session);
+
+      if (!toAccount) {
+        
+          throw new Error("Receiver Account not found.");
+      }
+
+      if(fromAccount.accountNumber == toAccount.accountNumber){
+        throw new Error("You not send money in your Account");
+      }
+
+      if(fromAccount.ifsc != toAccount.ifsc){
+        throw new Error("Invalid IFSC Code");
+      }
+
+      if(fromAccount.accountHolderName.toLowerCase() != accountHolderName.toLowerCase()){
+        throw new Error("Invalid Account Holder Name");
+      }
+
+    
+
+   
+      if (fromAccount.balance < amount) {
+          throw new Error("Insufficient funds.");
+      }
+
+   
+      fromAccount.balance = Number(fromAccount.balance) - Number(amount);
+      toAccount.balance = Number(toAccount.balance) + Number(amount);
+
+
+      await fromAccount.save({ session });
+      await toAccount.save({ session });
+
+  
+      const transaction = new Transaction({
+       
+          fromUser: fromAccount._id,
+          toUser: toAccount._id,
+          amount,
+          status: "Success",
+      });
+      const response = await transaction.save({ session });
+      console.log(response)
+
+  
+      await session.commitTransaction();
+      session.endSession();
+
+      res.status(200).json({
+          message: "Transaction successful!",
+          transactionId:response._id, 
+      });
+  } catch (error) {
+    
+      await session.abortTransaction();
+      session.endSession();
+
+      res.status(500).json({ message: "Transaction failed.", error: error.message });
+  }
+};
 
 
 
 
-module.exports={sendMoney,getTransactionHistory,getAllTransactionHistory}
+
+
+
+module.exports={sendMoney,getTransactionHistory,getAllTransactionHistory,bankTransfer}
