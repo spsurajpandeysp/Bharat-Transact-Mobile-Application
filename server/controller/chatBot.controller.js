@@ -9,6 +9,7 @@ const geminiModel = googleAI.getGenerativeModel({
 const generateResponse = async (req,res) => {
   try {
     const prompt = req.body.message;
+    console.log("prompt",prompt)
     const result = await geminiModel.generateContent(prompt);
     const response = result.response;
     console.log(response.text());

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,9 @@ import {
 } from 'react-native';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import axios from 'axios';
+
+import { url_api } from '../../impUrl';
 
 const initialMessages = [
   {
@@ -22,35 +25,47 @@ const initialMessages = [
   },
 ];
 
+
 const Support = ({ navigation }) => {
   const [messages, setMessages] = useState(initialMessages);
   const [input, setInput] = useState('');
   const flatListRef = useRef();
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
-    const newMessage = {
+
+    const userMessage = {
       id: Date.now().toString(),
-      text: input,
+      text: input.trim(),
       sender: 'user',
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
-    setMessages((prev) => [...prev, newMessage]);
+
+    setMessages(prev => [...prev, userMessage]);
     setInput('');
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        {
+
+    try {
+      const response = await axios.post(`${url_api}/api/chatBot/chat`, { message: input.trim() });
+      
+      if (response.data?.message) {
+        const supportMessage = {
           id: Date.now().toString() + '_s',
-          text: 'Thank you for reaching out! Our team will get back to you soon.',
+          text: response.data.message,
           sender: 'support',
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        },
-      ]);
-    }, 1200);
+        };
+        setMessages(prev => [...prev, supportMessage]);
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
   };
 
-  const renderItem = ({ item }) => (
+  const scrollToBottom = useCallback(() => {
+    flatListRef.current?.scrollToEnd({ animated: true });
+  }, []);
+
+  const renderItem = useCallback(({ item }) => (
     <View
       style={[
         styles.messageRow,
@@ -68,7 +83,10 @@ const Support = ({ navigation }) => {
           item.sender === 'user' ? styles.userBubble : styles.supportBubble,
         ]}
       >
-        <Text style={styles.bubbleText}>{item.text}</Text>
+        <Text style={[
+          styles.bubbleText,
+          item.sender === 'user' && styles.userBubbleText
+        ]}>{item.text}</Text>
         <Text style={styles.timeText}>{item.time}</Text>
       </View>
       {item.sender === 'user' && (
@@ -77,12 +95,15 @@ const Support = ({ navigation }) => {
         </View>
       )}
     </View>
-  );
+  ), []);
+
+  const keyExtractor = useCallback((item) => item.id, []);
 
   return (
     <View style={styles.safeArea}>
+      <StatusBar barStyle="light-content" />
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
+        style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
@@ -106,11 +127,12 @@ const Support = ({ navigation }) => {
             ref={flatListRef}
             data={messages}
             renderItem={renderItem}
-            keyExtractor={(item) => item.id}
+            keyExtractor={keyExtractor}
             contentContainerStyle={styles.chatContainer}
-            onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-            onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
+            onContentSizeChange={scrollToBottom}
+            onLayout={scrollToBottom}
             showsVerticalScrollIndicator={false}
+            removeClippedSubviews={true}
           />
         </View>
         <View style={styles.inputRow}>
@@ -122,7 +144,11 @@ const Support = ({ navigation }) => {
             placeholderTextColor="#888"
             multiline
           />
-          <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+          <TouchableOpacity 
+            style={[styles.sendButton, !input.trim() && styles.sendButtonDisabled]} 
+            onPress={handleSend}
+            disabled={!input.trim()}
+          >
             <MaterialIcons name="send" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
@@ -135,6 +161,9 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#F5F5F5',
+  },
+  container: {
+    flex: 1,
   },
   header: {
     paddingTop: Platform.OS === 'ios' ? 50 : 20,
@@ -207,6 +236,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#222',
   },
+  userBubbleText: {
+    color: '#fff',
+  },
   timeText: {
     fontSize: 11,
     color: '#888',
@@ -238,6 +270,9 @@ const styles = StyleSheet.create({
     padding: 10,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  sendButtonDisabled: {
+    backgroundColor: '#A0AEC0',
   },
   avatarCircle: {
     width: 32,
