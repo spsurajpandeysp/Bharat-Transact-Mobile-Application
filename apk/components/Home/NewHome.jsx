@@ -180,12 +180,12 @@ const NewHome = ({ navigation }) => {
                   <Text style={styles.serviceText}>Bank Transfer</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.serviceItem} onPress={()=>{navigation.navigate("PayBills")}}>
+                {/* <TouchableOpacity style={styles.serviceItem} onPress={()=>{navigation.navigate("PayBills")}}>
                   <View style={styles.serviceIconContainer}>
                     <MaterialIcons name="payment" size={30} color="#1F41B1" />
                   </View>
                   <Text style={styles.serviceText}>Pay Bills</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
 
                 <TouchableOpacity 
                   style={styles.serviceItem}
