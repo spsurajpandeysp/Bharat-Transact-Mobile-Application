@@ -45,6 +45,7 @@ const getUserDetails = async(req,res) =>{
         lastName: user.lastName,
         profilePic: user.profilePic,
         address: user.address
+        
       };
   
       res.status(200).json({ message: 'User details fetched successfully!', userDetails });
@@ -87,7 +88,6 @@ const userLogin = async (req, res) => {
     }
 }
 
-// Add auth middleware
 const authMiddleware = async (req, res, next) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];
