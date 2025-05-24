@@ -70,6 +70,7 @@ const sendMoney = async (req, res) => {
       res.status(200).json({
           message: "Transaction successful!",
           transactionId:response._id, 
+          data:toAccount
       });
   } catch (error) {
     
@@ -141,6 +142,7 @@ const getAllTransactionHistory = async(req,res) => {
 
 
 const bankTransfer = async (req, res) => {
+  console.log("bankTransfer",req.body)
   const { accountNumber, ifscCode, accountHolderName, amount,mpin } = req.body;
   const { userId } = req.user;
   console.log("sendMoney",accountNumber, ifscCode, accountHolderName, amount,mpin)
@@ -154,7 +156,7 @@ const bankTransfer = async (req, res) => {
     if(!user){
       return res.status(400).json({ message: "User not found." });
     }
-    if(user.mpin !== mpin){ 
+    if(user.mpin != mpin){ 
       return res.status(400).json({ message: "Invalid MPIN." });
     }
   }
@@ -172,15 +174,15 @@ const bankTransfer = async (req, res) => {
           throw new Error("Receiver Account not found.");
       }
 
-      if(fromAccount.accountNumber == toAccount.accountNumber){
+      if(fromAccount.accountNumber == accountNumber){
         throw new Error("You not send money in your Account");
       }
 
-      if(fromAccount.ifsc != toAccount.ifsc){
+      if(toAccount.ifsc != ifscCode){
         throw new Error("Invalid IFSC Code");
       }
 
-      if(fromAccount.accountHolderName.toLowerCase() != accountHolderName.toLowerCase()){
+        if(toAccount.firstName.toLowerCase()+" "+toAccount.lastName.toLowerCase() != accountHolderName.toLowerCase()){
         throw new Error("Invalid Account Holder Name");
       }
 
@@ -217,12 +219,13 @@ const bankTransfer = async (req, res) => {
       res.status(200).json({
           message: "Transaction successful!",
           transactionId:response._id, 
+          data:toAccount
       });
   } catch (error) {
     
       await session.abortTransaction();
       session.endSession();
-
+      console.log(error.message)
       res.status(500).json({ message: "Transaction failed.", error: error.message });
   }
 };
@@ -245,15 +248,19 @@ const verifyAccountDetails = async (req, res) => {
       return res.status(400).json({ message: "User not found." });
     }
 
-    if (user.accountNumber != accountNumber) {
-      return res.status(400).json({ message: "Invalid Account Number." });
+     const receiverAccount = await User.findOne({ accountNumber: accountNumber });
+
+    if (!receiverAccount) {
+      return res.status(400).json({ message: "Receiver Account not found." });
     }
 
-    if (user.ifsc != ifscCode) {
+  
+
+    if (ifscCode != receiverAccount.ifsc) {
       return res.status(400).json({ message: "Invalid IFSC Code." });
     }
 
-    if (user.firstName.toLowerCase()+" "+user.lastName.toLowerCase() != accountHolderName.toLowerCase()) {
+    if (accountHolderName.toLowerCase() != receiverAccount.firstName.toLowerCase()+" "+receiverAccount.lastName.toLowerCase()) {
       return res.status(400).json({ message: "Invalid Account Holder Name." });
     }
 
@@ -261,8 +268,9 @@ const verifyAccountDetails = async (req, res) => {
       return res.status(400).json({ message: "You can't send money in your own account." });
     }
 
-    return res.status(200).json({ message: "Account Details Verified." });
+    return res.status(200).json({ message: "Account Details Verified."});
   } catch (error) {
+    console.log(error.message)
     return res.status(500).json({ message: "An error occurred while verifying account details.", error: error.message });
   }
 }

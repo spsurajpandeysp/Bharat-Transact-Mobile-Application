@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState } from 'react'
 import { OtpInput } from "react-native-otp-entry";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 const {height,width}=Dimensions.get('window');
 import { url_api } from '../../impUrl';
@@ -24,6 +25,9 @@ export default function Mpin({ navigation, route }) {
             console.log(route.params.recipient, route.params.amount, mpin);
 
             let data;
+            let path;
+
+            console.log("route.params.fromScreen",route.params)
 
             if(route.params.fromScreen == 'SendMoney'){
                 path = 'send-money'
@@ -44,7 +48,7 @@ export default function Mpin({ navigation, route }) {
                 }
             }
 
-
+            console.log("data",data)
 
             const response = await axios.post(`${url_api}/api/transaction/${path}`, data, {
                 headers: {
@@ -55,16 +59,18 @@ export default function Mpin({ navigation, route }) {
             });
 
             console.log("response", response);
-            if (response.status === 200) {
-                navigation.navigate('TransactionSuccessfull', {
+
+            console.log("response.data",response.data)
+
+            
+            
+            navigation.navigate('TransactionSuccessfull', {
                     amount: route.params.amount,
-                    recipient: route.params.recipient,
+                    data: response.data.data,
+                    transactionId: response.data.transactionId,
                 });
-            } else {
-                const errorMessage = response.data.message || "Transaction failed.";
-                console.log("Error:", errorMessage);
-                Alert.alert("Error", errorMessage);
-            }
+            
+        
         } catch (error) {
             const errorMessage = error.response?.data?.message || "An unexpected error occurred during the transaction.";
             console.error("Transaction error:", errorMessage);
@@ -98,7 +104,7 @@ export default function Mpin({ navigation, route }) {
                     </View>
                     <View style={styles.recipientRow}>
                         <Text style={styles.recipientLabel}>To:</Text>
-                        <Text style={styles.recipientValue}>{route.params?.recipient || 'N/A'}</Text>
+                        <Text style={styles.recipientValue}>{route.params?.recipient || route.params?.accountNumber || 'N/A'}</Text>
                     </View>
                 </View>
 

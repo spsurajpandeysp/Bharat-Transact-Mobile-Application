@@ -53,10 +53,12 @@ const BankTransfer = ({ navigation }) => {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
-      console.log(response.data)
+      console.log("response.data",response.data)
       navigation.navigate('Mpin', {
         amount: amount,
-        recipient: recipient,
+        accountNumber: accountNumber,
+        ifscCode: ifscCode,
+        accountHolderName: accountHolderName,
         fromScreen: 'BankTransfer'
       });
       setIsLoading(false);
