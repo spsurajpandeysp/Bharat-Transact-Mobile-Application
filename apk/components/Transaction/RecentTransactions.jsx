@@ -1,15 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  ActivityIndicator,
-  RefreshControl,
-  Platform,
-  Animated,
-  Dimensions,
+import {View,  Text,  StyleSheet, FlatList,TouchableOpacity,ActivityIndicator,RefreshControl,Platform,Animated,Dimensions,
 } from 'react-native';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
