@@ -276,5 +276,17 @@ const verifyAccountDetails = async (req, res) => {
 }
 
 
+const verifyQrCode = async (req, res) => {
+  const { qrData } = req.body;
+  if (!qrData) {
+    return res.status(400).json({ valid: false, message: "QR data is required" });
+  }
 
-module.exports={sendMoney,getTransactionHistory,getAllTransactionHistory,bankTransfer,verifyAccountDetails}
+  const user = await User.findOne({ qrCode: qrData });
+  if (user) {
+    return res.status(200).json({ valid: true, userId: user._id });
+  } else {
+    return res.status(404).json({ valid: false, message: "QR code not found" });
+  }
+};
+module.exports={sendMoney,getTransactionHistory,getAllTransactionHistory,bankTransfer,verifyAccountDetails,verifyQrCode}
