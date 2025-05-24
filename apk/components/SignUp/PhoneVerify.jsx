@@ -31,7 +31,7 @@ const PhoneVerifyOtp = ({ route, navigation }) => {
     axios.post(`${url}/api/auth/phone-verify`, { phoneNumber, otp })
       .then((response) => {
           Alert.alert("Success", "Phone number verified successfully!");
-          navigation.replace("MpinCreate");
+          navigation.replace("Login");
       })
       .catch((error) => {
         Alert.alert("Error", error.response?.data?.message || "An error occurred during OTP verification.");

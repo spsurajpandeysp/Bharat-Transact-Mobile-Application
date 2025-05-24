@@ -72,7 +72,7 @@ export default function MpinCreate({ navigation }) {
         Alert.alert(
           "Success",
           "MPIN created successfully!",
-          [{ text: "OK", onPress: () => navigation.navigate("Home") }]
+          [{ text: "OK", onPress: () => navigation.reset({ index: 0, routes: [{ name: "Home" }] }) }]
         );
       } else {
         setErrorMessage(response.data?.message || "Failed to create MPIN");
