@@ -23,13 +23,30 @@ export default function Mpin({ navigation, route }) {
             console.log("token", token);
             console.log(route.params.recipient, route.params.amount, mpin);
 
-            const response = await axios.post(`${url_api}/api/transaction/send-money`, 
-            {
-                recipient: route.params.recipient,
-                amount: route.params.amount,
-                mpin: mpin,
-            }, 
-            {
+            let data;
+
+            if(route.params.fromScreen == 'SendMoney'){
+                path = 'send-money'
+                data = {
+                    recipient: route.params.recipient,
+                    amount: route.params.amount,
+                    mpin: mpin,
+                }
+            }
+            else if(route.params.fromScreen == 'BankTransfer'){
+                path = 'bank-transfer'
+                data = {
+                    accountNumber: route.params.accountNumber,
+                    ifscCode: route.params.ifscCode,
+                    accountHolderName: route.params.accountHolderName,
+                    amount: route.params.amount,
+                    mpin: mpin,
+                }
+            }
+
+
+
+            const response = await axios.post(`${url_api}/api/transaction/${path}`, data, {
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,

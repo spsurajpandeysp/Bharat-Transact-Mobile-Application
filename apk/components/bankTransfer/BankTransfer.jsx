@@ -31,17 +31,40 @@ const BankTransfer = ({ navigation }) => {
   }, []);
 
   const fetchSavedAccounts = async () => {
+    // try {
+    //   const token = await AsyncStorage.getItem('jwt_token');
+    //   const response = await axios.get(`${url_api}/api/transaction/saved-accounts`, {
+    //     headers: { Authorization: `Bearer ${token}` }
+    //   });
+    //   setSavedAccounts(response.data.accounts || []);
+    // } catch (error) {
+    //   console.error('Error fetching saved accounts:', error);
+    // }
+  };
+
+  const verifyAccountDetails = async () => {
     try {
+      setIsLoading(true);
       const token = await AsyncStorage.getItem('jwt_token');
-      const response = await axios.post(`${url_api}/api/transaction/verify-account-details`, {accountNumber,ifscCode,accountHolderName} ,{
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await axios.post(
+        `${url_api}/api/transaction/verify-account-details`,
+        { accountNumber, ifscCode, accountHolderName },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      console.log(response.data)
+      navigation.navigate('Mpin', {
+        amount: amount,
+        recipient: recipient,
+        fromScreen: 'BankTransfer'
       });
-      setSavedAccounts(response.data.accounts || []);
-      navigation.navigate('BankTransferMpin', {
-        savedAccounts: {accountNumber,ifscCode,accountHolderName} || []
-      });
+      setIsLoading(false);
+      return response.data;
     } catch (error) {
-      console.error('Error fetching saved accounts:', error);
+      setIsLoading(false);
+      Alert.alert('Error', error.response.data.message || 'Failed to verify account details. Please check the information and try again.');
+      return null;
     }
   };
 
@@ -67,6 +90,9 @@ const BankTransfer = ({ navigation }) => {
 
   const handleTransfer = async () => {
     if (!validateInputs()) return;
+
+    const verificationResult = await verifyAccountDetails();
+    if (!verificationResult) return;
 
     navigation.navigate('MPIN', {
       type: 'bank_transfer',

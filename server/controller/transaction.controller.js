@@ -234,6 +234,8 @@ const verifyAccountDetails = async (req, res) => {
     const { accountNumber, ifscCode, accountHolderName } = req.body;
     const { userId } = req.user;
 
+    console.log(accountNumber, ifscCode, accountHolderName)
+
     if (!userId || !accountNumber || !ifscCode || !accountHolderName) {
       return res.status(400).json({ message: "Invalid input. or Required All Fields" });
     }
