@@ -7,6 +7,7 @@ const authRounter = require('./routers/auth.router')
 const moneyRequestRounter = require('./routers/moneyRequest.router')
 const transactionRouter = require('./routers/transaction.router')
 const userRouter = require('./routers/user.router')
+const chatBotRouter = require('./routers/chatBot.router')
 require('dotenv').config();
 
 
@@ -44,6 +45,7 @@ app.use('/api/auth/',authRounter);
 app.use('/api/transaction/',transactionRouter);
 app.use('/api/money-request/',moneyRequestRounter);
 app.use('/api/user/',userRouter);
+app.use('/api/chatbot/', chatBotRouter);
 
 
 
