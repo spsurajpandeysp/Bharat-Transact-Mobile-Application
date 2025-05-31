@@ -3,10 +3,14 @@ const {Transaction} = require('../models/transaction.model')
 const mongoose = require('mongoose')
 
 
+const handleAmount = (amount) => {
+    return parseFloat(parseFloat(amount).toFixed(2));
+};
+
 const sendMoney = async (req, res) => {
-  const { recipient, amount,mpin } = req.body;
+  const { recipient, amount, mpin } = req.body;
   const { userId } = req.user;
-  console.log("sendMoney",recipient, amount,mpin)
+  console.log("sendMoney", recipient, amount, mpin);
 
   if (!userId || !recipient || !amount || amount <= 0 || !mpin) {
       return res.status(400).json({ message: "Invalid input. or Required All Fields" });
@@ -26,57 +30,53 @@ const sendMoney = async (req, res) => {
   session.startTransaction();
 
   try {
-     
       const fromAccount = await User.findById(userId).session(session);
       const toAccount = await User.findOne({ phoneNumber: recipient }).session(session);
 
       if (!toAccount) {
-        
           throw new Error("Receiver Account not found.");
       }
 
-      if (fromAccount.phoneNumber ==  toAccount.phoneNumber) {
-        throw new Error("You not send money in your Account");
-    }
+      if (fromAccount.phoneNumber == toAccount.phoneNumber) {
+        throw new Error("Sending money to your own account is not possible");
+      }
 
-   
-      if (fromAccount.balance < amount) {
+
+      const transferAmount = handleAmount(amount);
+      const currentBalance = handleAmount(fromAccount.balance);
+
+      if (currentBalance < transferAmount) {
           throw new Error("Insufficient funds.");
       }
 
-   
-      fromAccount.balance = Number(fromAccount.balance) - Number(amount);
-      toAccount.balance = Number(toAccount.balance) + Number(amount);
-
+    
+      fromAccount.balance = handleAmount(currentBalance - transferAmount);
+      toAccount.balance = handleAmount(handleAmount(toAccount.balance) + transferAmount);
 
       await fromAccount.save({ session });
       await toAccount.save({ session });
 
-  
       const transaction = new Transaction({
-       
           fromUser: fromAccount._id,
           toUser: toAccount._id,
-          amount,
+          amount: transferAmount,
           status: "Success",
       });
       const response = await transaction.save({ session });
-      console.log(response)
+      console.log(response);
 
-  
       await session.commitTransaction();
       session.endSession();
 
       res.status(200).json({
           message: "Transaction successful!",
-          transactionId:response._id, 
-          data:toAccount
+          transactionId: response._id, 
+          data: toAccount
       });
   } catch (error) {
-    
       await session.abortTransaction();
       session.endSession();
-
+      console.log("Transaction error:", error.message);
       res.status(500).json({ message: "Transaction failed.", error: error.message });
   }
 };
@@ -142,10 +142,10 @@ const getAllTransactionHistory = async(req,res) => {
 
 
 const bankTransfer = async (req, res) => {
-  console.log("bankTransfer",req.body)
-  const { accountNumber, ifscCode, accountHolderName, amount,mpin } = req.body;
+  console.log("bankTransfer", req.body);
+  const { accountNumber, ifscCode, accountHolderName, amount, mpin } = req.body;
   const { userId } = req.user;
-  console.log("sendMoney",accountNumber, ifscCode, accountHolderName, amount,mpin)
+  console.log("bankTransfer", accountNumber, ifscCode, accountHolderName, amount, mpin);
 
   if (!userId || !accountNumber || !ifscCode || !accountHolderName || !amount || amount <= 0 || !mpin) {
       return res.status(400).json({ message: "Invalid input. or Required All Fields" });
@@ -165,67 +165,62 @@ const bankTransfer = async (req, res) => {
   session.startTransaction();
 
   try {
-     
       const fromAccount = await User.findById(userId).session(session);
       const toAccount = await User.findOne({ accountNumber: accountNumber }).session(session);
 
       if (!toAccount) {
-        
           throw new Error("Receiver Account not found.");
       }
 
       if(fromAccount.accountNumber == accountNumber){
-        throw new Error("You not send money in your Account");
+        throw new Error("Sending money to your own account is not possible");
       }
 
       if(toAccount.ifsc != ifscCode){
         throw new Error("Invalid IFSC Code");
       }
 
-        if(toAccount.firstName.toLowerCase()+" "+toAccount.lastName.toLowerCase() != accountHolderName.toLowerCase()){
+      if(toAccount.firstName.toLowerCase()+" "+toAccount.lastName.toLowerCase() != accountHolderName.toLowerCase()){
         throw new Error("Invalid Account Holder Name");
       }
 
-    
+      // Convert amounts to handle precision
+      const transferAmount = handleAmount(amount);
+      const currentBalance = handleAmount(fromAccount.balance);
 
-   
-      if (fromAccount.balance < amount) {
+      // Check if balance is sufficient with a small tolerance
+      if (currentBalance < transferAmount) {
           throw new Error("Insufficient funds.");
       }
 
-   
-      fromAccount.balance = Number(fromAccount.balance) - Number(amount);
-      toAccount.balance = Number(toAccount.balance) + Number(amount);
-
+      // Update balances with proper precision
+      fromAccount.balance = handleAmount(currentBalance - transferAmount);
+      toAccount.balance = handleAmount(handleAmount(toAccount.balance) + transferAmount);
 
       await fromAccount.save({ session });
       await toAccount.save({ session });
 
-  
       const transaction = new Transaction({
-       
           fromUser: fromAccount._id,
           toUser: toAccount._id,
-          amount,
+          amount: transferAmount,
           status: "Success",
       });
       const response = await transaction.save({ session });
-      console.log(response)
+      console.log(response);
 
-  
       await session.commitTransaction();
       session.endSession();
 
       res.status(200).json({
           message: "Transaction successful!",
-          transactionId:response._id, 
-          data:toAccount
+          transactionId: response._id, 
+          data: toAccount
       });
   } catch (error) {
-    
       await session.abortTransaction();
       session.endSession();
-      console.log(error.message)
+      console.log("Transaction error:", error.message);
       res.status(500).json({ message: "Transaction failed.", error: error.message });
   }
 };

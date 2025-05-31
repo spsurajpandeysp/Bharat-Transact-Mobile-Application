@@ -21,14 +21,6 @@ const url = url_api;
 const { width, height } = Dimensions.get("window");
 
 const SendMoney = ({ navigation, route }) => {
-  const logout = async () => {
-    try {
-      await AsyncStorage.removeItem("jwt_token");
-      navigation.replace("OpenAppLoading");
-    } catch (error) {
-      Alert.alert("An Error Occurred While logging out. Please Try Again Later");
-    }
-  };
   const [amount, setAmount] = useState("");
   const [recipient, setRecipient] = useState("");
   const [jwtToken, setJwtToken] = useState(null);
@@ -71,7 +63,6 @@ const SendMoney = ({ navigation, route }) => {
     }
 
     setLoading(true);
-    // Show loader for 1 second then navigate to MPIN
     setTimeout(() => {
       setLoading(false);
       navigation.navigate('Mpin', {

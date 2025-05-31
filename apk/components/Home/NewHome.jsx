@@ -10,6 +10,7 @@ import {
   ImageBackground,
   ScrollView,
   RefreshControl,
+  Platform,
 } from 'react-native';
 import { MaterialIcons, AntDesign, FontAwesome } from '@expo/vector-icons';
 import Sidebar from '../Sidebar/sidebar';
@@ -273,7 +274,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: 50,
+    paddingTop: Platform.OS === 'ios' ? 50 : 20,
     paddingBottom: 15,
     backgroundColor: '#1F41B1',
   },

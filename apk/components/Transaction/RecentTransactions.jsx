@@ -141,7 +141,7 @@ const RecentTransactions = ({ navigation }) => {
 
 
   const renderTransactionItem = ({ item }) => (
-    <TouchableOpacity 
+    <View 
       style={styles.transactionItem}
       // onPress={() => navigation.navigate('TransactionDetails', { transaction: item })}
     >
@@ -173,9 +173,9 @@ const RecentTransactions = ({ navigation }) => {
         ]}>
           {item.prefix}₹{item.amount}
         </Text>
-        <MaterialIcons name="chevron-right" size={20} color="#999" />
+        {/* <MaterialIcons name="chevron-right" size={20} color="#999" /> */}
       </View>
-    </TouchableOpacity>
+    </View>
   );
 
   if (loading) {
