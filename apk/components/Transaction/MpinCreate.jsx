@@ -1,22 +1,10 @@
 import { 
-  StyleSheet, 
-  Alert, 
-  Text, 
-  View, 
-  KeyboardAvoidingView, 
-  Platform, 
-  TouchableOpacity, 
-  ActivityIndicator, 
-  Dimensions,
-  SafeAreaView,
-  StatusBar,
-  ScrollView
+  StyleSheet, Alert, Text, View, KeyboardAvoidingView, Platform, TouchableOpacity, ActivityIndicator, Dimensions,SafeAreaView,StatusBar, ScrollView
 } from 'react-native'
 import React, { useState, useEffect, useCallback } from 'react'
 import { OtpInput } from "react-native-otp-entry";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 

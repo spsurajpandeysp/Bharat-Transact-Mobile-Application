@@ -1,14 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  TextInput,
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
-  StatusBar,
+import { View, Text, StyleSheet,TouchableOpacity, TextInput, FlatList, KeyboardAvoidingView, Platform,StatusBar,
 } from 'react-native';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
