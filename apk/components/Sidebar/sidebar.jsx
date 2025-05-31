@@ -16,7 +16,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { url_api } from '../../impUrl';
-import QRCode from 'react-native-qrcode-svg';
 
 const { width, height } = Dimensions.get('window');
 

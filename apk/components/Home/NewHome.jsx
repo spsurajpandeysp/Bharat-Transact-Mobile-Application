@@ -37,22 +37,37 @@ const NewHome = ({ navigation }) => {
     try {
       const token = await AsyncStorage.getItem('jwt_token');
       if (!token) {
+        console.log('No token found, redirecting to login');
         navigation.replace('OpenAppLoading');
         return;
       }
+
       const response = await axios.get(`${url_api}/api/user/get-user-by-JWT`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       if (response.data && response.data.userDetails) {
-        console.log(response.data.userDetails);
-        if(response.data.userDetails.mpin==""){
+        console.log('User data fetched successfully:', response.data.userDetails);
+        if(response.data.userDetails.mpin === ""){
           navigation.navigate('MpinCreate');
         }
         setUserData(response.data.userDetails);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
+      if (error.response) {
+        if (error.response.status === 401 || error.response.status === 403) {
+          await AsyncStorage.removeItem('jwt_token');
+          navigation.replace('OpenAppLoading');
+        } else {
+          console.error('Server error:', error.response.data);
+        }
+      } else {
+        console.error('Network error:', error.message);
+      }
     }
   };
 
