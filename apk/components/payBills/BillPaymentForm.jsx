@@ -230,6 +230,17 @@ const BillPaymentForm = ({ route, navigation }) => {
               placeholderTextColor="#999"
             />
           </View>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Amount (₹)</Text>
+            <TextInput
+              style={styles.input}
+              value={amount}
+              onChangeText={setAmount}
+              keyboardType="numeric"
+              placeholder="Enter amount"
+              placeholderTextColor="#999"
+            />
+          </View>
         </View>
         <View style={styles.footerInScroll}>
           <TouchableOpacity
