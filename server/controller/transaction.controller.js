@@ -3,10 +3,14 @@ const {Transaction} = require('../models/transaction.model')
 const mongoose = require('mongoose')
 
 
+const handleAmount = (amount) => {
+    return parseFloat(parseFloat(amount).toFixed(2));
+};
+
 const sendMoney = async (req, res) => {
-  const { recipient, amount,mpin } = req.body;
+  const { recipient, amount, mpin } = req.body;
   const { userId } = req.user;
-  console.log("sendMoney",recipient, amount,mpin)
+  console.log("sendMoney", recipient, amount, mpin);
 
   if (!userId || !recipient || !amount || amount <= 0 || !mpin) {
       return res.status(400).json({ message: "Invalid input. or Required All Fields" });
@@ -22,62 +26,103 @@ const sendMoney = async (req, res) => {
     }
   }
 
-  const session = await mongoose.startSession();
-  session.startTransaction();
+  let retries = 3; 
+  let lastError;
 
-  try {
-     
-      const fromAccount = await User.findById(userId).session(session);
-      const toAccount = await User.findOne({ phoneNumber: recipient }).session(session);
-
-      if (!toAccount) {
-        
-          throw new Error("Receiver Account not found.");
-      }
-
-      if (fromAccount.phoneNumber ==  toAccount.phoneNumber) {
-        throw new Error("You not send money in your Account");
-    }
-
-   
-      if (fromAccount.balance < amount) {
-          throw new Error("Insufficient funds.");
-      }
-
-   
-      fromAccount.balance = Number(fromAccount.balance) - Number(amount);
-      toAccount.balance = Number(toAccount.balance) + Number(amount);
-
-
-      await fromAccount.save({ session });
-      await toAccount.save({ session });
-
-  
-      const transaction = new Transaction({
+  while (retries > 0) {
+    const session = await mongoose.startSession();
+    try {
+      await session.withTransaction(async () => {
        
+        const fromAccount = await User.findById(userId).session(session);
+        const toAccount = await User.findOne({ phoneNumber: recipient }).session(session);
+
+        if (!fromAccount) {
+          throw new Error("Sender account not found.");
+        }
+
+        if (!toAccount) {
+          throw new Error("Receiver Account not found.");
+        }
+
+        if (fromAccount.phoneNumber === toAccount.phoneNumber) {
+          throw new Error("Sending money to your own account is not possible");
+        }
+
+        const transferAmount = handleAmount(amount);
+        const currentBalance = handleAmount(fromAccount.balance);
+
+        if (currentBalance < transferAmount) {
+          throw new Error("Insufficient funds.");
+        }
+
+    
+        const updatedFromAccount = await User.findOneAndUpdate(
+          { _id: userId, balance: { $gte: transferAmount } },
+          { $inc: { balance: -transferAmount } },
+          { session, new: true }
+        );
+
+        if (!updatedFromAccount) {
+          throw new Error("Failed to update sender's balance.");
+        }
+
+        const updatedToAccount = await User.findOneAndUpdate(
+          { _id: toAccount._id },
+          { $inc: { balance: transferAmount } },
+          { session, new: true }
+        );
+
+        if (!updatedToAccount) {
+          throw new Error("Failed to update receiver's balance.");
+        }
+
+      
+        const transaction = new Transaction({
           fromUser: fromAccount._id,
           toUser: toAccount._id,
-          amount,
+          amount: transferAmount,
           status: "Success",
-      });
-      const response = await transaction.save({ session });
-      console.log(response)
+        });
 
-  
-      await session.commitTransaction();
-      session.endSession();
+        await transaction.save({ session });
+      }, {
+        readConcern: { level: 'snapshot' },
+        writeConcern: { w: 'majority' }
+      });
+
+      await session.endSession();
+      
+     
+      const transaction = await Transaction.findOne({
+        fromUser: userId,
+        toUser: (await User.findOne({ phoneNumber: recipient }))._id,
+        amount: handleAmount(amount)
+      }).sort({ date: -1 });
 
       res.status(200).json({
-          message: "Transaction successful!",
-          transactionId:response._id, 
-          data:toAccount
+        message: "Transaction successful!",
+        transactionId: transaction._id,
+        data: await User.findOne({ phoneNumber: recipient })
       });
-  } catch (error) {
-    
-      await session.abortTransaction();
-      session.endSession();
-
-      res.status(500).json({ message: "Transaction failed.", error: error.message });
+      
+      return; 
+    } catch (error) {
+      await session.endSession();
+      lastError = error;
+      retries--;
+      
+      if (retries === 0) {
+        console.log("Transaction error after all retries:", error.message);
+        res.status(500).json({ 
+          message: "Transaction failed after multiple attempts.", 
+          error: error.message 
+        });
+        return;
+      }
+ 
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
   }
 };
 
@@ -142,10 +187,10 @@ const getAllTransactionHistory = async(req,res) => {
 
 
 const bankTransfer = async (req, res) => {
-  console.log("bankTransfer",req.body)
-  const { accountNumber, ifscCode, accountHolderName, amount,mpin } = req.body;
+  console.log("bankTransfer", req.body);
+  const { accountNumber, ifscCode, accountHolderName, amount, mpin } = req.body;
   const { userId } = req.user;
-  console.log("sendMoney",accountNumber, ifscCode, accountHolderName, amount,mpin)
+  console.log("bankTransfer", accountNumber, ifscCode, accountHolderName, amount, mpin);
 
   if (!userId || !accountNumber || !ifscCode || !accountHolderName || !amount || amount <= 0 || !mpin) {
       return res.status(400).json({ message: "Invalid input. or Required All Fields" });
@@ -161,72 +206,109 @@ const bankTransfer = async (req, res) => {
     }
   }
 
-  const session = await mongoose.startSession();
-  session.startTransaction();
+  let retries = 3; 
+  let lastError;
 
-  try {
-     
-      const fromAccount = await User.findById(userId).session(session);
-      const toAccount = await User.findOne({ accountNumber: accountNumber }).session(session);
+  while (retries > 0) {
+    const session = await mongoose.startSession();
+    try {
+      await session.withTransaction(async () => {
+        const fromAccount = await User.findById(userId).session(session);
+        const toAccount = await User.findOne({ accountNumber: accountNumber }).session(session);
 
-      if (!toAccount) {
-        
+        if (!fromAccount) {
+          throw new Error("Sender account not found.");
+        }
+
+        if (!toAccount) {
           throw new Error("Receiver Account not found.");
-      }
+        }
 
-      if(fromAccount.accountNumber == accountNumber){
-        throw new Error("You not send money in your Account");
-      }
+        if (fromAccount.accountNumber === accountNumber) {
+          throw new Error("Sending money to your own account is not possible");
+        }
 
-      if(toAccount.ifsc != ifscCode){
-        throw new Error("Invalid IFSC Code");
-      }
+        if (toAccount.ifsc !== ifscCode) {
+          throw new Error("Invalid IFSC Code");
+        }
 
-        if(toAccount.firstName.toLowerCase()+" "+toAccount.lastName.toLowerCase() != accountHolderName.toLowerCase()){
-        throw new Error("Invalid Account Holder Name");
-      }
+        if (toAccount.firstName.toLowerCase() + " " + toAccount.lastName.toLowerCase() !== accountHolderName.toLowerCase()) {
+          throw new Error("Invalid Account Holder Name");
+        }
 
-    
+        const transferAmount = handleAmount(amount);
+        const currentBalance = handleAmount(fromAccount.balance);
 
-   
-      if (fromAccount.balance < amount) {
+        if (currentBalance < transferAmount) {
           throw new Error("Insufficient funds.");
-      }
+        }
 
-   
-      fromAccount.balance = Number(fromAccount.balance) - Number(amount);
-      toAccount.balance = Number(toAccount.balance) + Number(amount);
+        const updatedFromAccount = await User.findOneAndUpdate(
+          { _id: userId, balance: { $gte: transferAmount } },
+          { $inc: { balance: -transferAmount } },
+          { session, new: true }
+        );
+
+        if (!updatedFromAccount) {
+          throw new Error("Failed to update sender's balance.");
+        }
+
+        const updatedToAccount = await User.findOneAndUpdate(
+          { _id: toAccount._id },
+          { $inc: { balance: transferAmount } },
+          { session, new: true }
+        );
+
+        if (!updatedToAccount) {
+          throw new Error("Failed to update receiver's balance.");
+        }
 
 
-      await fromAccount.save({ session });
-      await toAccount.save({ session });
-
-  
-      const transaction = new Transaction({
-       
+        const transaction = new Transaction({
           fromUser: fromAccount._id,
           toUser: toAccount._id,
-          amount,
+          amount: transferAmount,
           status: "Success",
-      });
-      const response = await transaction.save({ session });
-      console.log(response)
+        });
 
-  
-      await session.commitTransaction();
-      session.endSession();
+        await transaction.save({ session });
+      }, {
+        readConcern: { level: 'snapshot' },
+        writeConcern: { w: 'majority' }
+      });
+
+      await session.endSession();
+      
+
+      const transaction = await Transaction.findOne({
+        fromUser: userId,
+        toUser: (await User.findOne({ accountNumber: accountNumber }))._id,
+        amount: handleAmount(amount)
+      }).sort({ date: -1 });
 
       res.status(200).json({
-          message: "Transaction successful!",
-          transactionId:response._id, 
-          data:toAccount
+        message: "Transaction successful!",
+        transactionId: transaction._id,
+        data: await User.findOne({ accountNumber: accountNumber })
       });
-  } catch (error) {
-    
-      await session.abortTransaction();
-      session.endSession();
-      console.log(error.message)
-      res.status(500).json({ message: "Transaction failed.", error: error.message });
+      
+      return;
+    } catch (error) {
+      await session.endSession();
+      lastError = error;
+      retries--;
+      
+      if (retries === 0) {
+        console.log("Transaction error after all retries:", error.message);
+        res.status(500).json({ 
+          message: "Transaction failed after multiple attempts.", 
+          error: error.message 
+        });
+        return;
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
   }
 };
 
@@ -276,5 +358,17 @@ const verifyAccountDetails = async (req, res) => {
 }
 
 
+const verifyQrCode = async (req, res) => {
+  const { qrData } = req.body;
+  if (!qrData) {
+    return res.status(400).json({ valid: false, message: "QR data is required" });
+  }
 
-module.exports={sendMoney,getTransactionHistory,getAllTransactionHistory,bankTransfer,verifyAccountDetails}
+  const user = await User.findOne({ qrCode: qrData });
+  if (user) {
+    return res.status(200).json({ valid: true, userId: user._id });
+  } else {
+    return res.status(404).json({ valid: false, message: "QR code not found" });
+  }
+};
+module.exports={sendMoney,getTransactionHistory,getAllTransactionHistory,bankTransfer,verifyAccountDetails,verifyQrCode}

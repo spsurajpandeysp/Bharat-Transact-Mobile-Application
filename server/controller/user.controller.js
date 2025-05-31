@@ -141,7 +141,9 @@ const getUserByJWT = async(req,res) =>{
       phoneNumber: user.phoneNumber,
       mpin: user.mpin,
       createdAt: user.createdAt,
-      updatedAt: user.updatedAt
+      updatedAt: user.updatedAt,
+      accountNumber:user.accountNumber,
+      ifsc:user.ifsc
     };
 
     res.status(200).json({ message: 'User details fetched successfully!', userDetails });

@@ -6,10 +6,8 @@ import {
   TouchableOpacity,
   Dimensions,
   StatusBar,
-  ImageBackground,
   ScrollView,
   ActivityIndicator,
-  Image,
   Platform,
   Alert,
 } from 'react-native';
@@ -18,7 +16,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { url_api } from '../../impUrl';
-import QRCode from 'react-native-qrcode-svg';
 
 const { width, height } = Dimensions.get('window');
 
@@ -110,12 +107,10 @@ const Sidebar = ({ navigation, onClose }) => {
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor="#1F41B1" barStyle="light-content" />
-      {/* Close Button */}
       <TouchableOpacity style={styles.closeButton} onPress={onClose}>
         <AntDesign name="close" size={28} color="#1F41B1" />
       </TouchableOpacity>
       <ScrollView style={styles.scrollView} contentContainerStyle={{ paddingBottom: 30 }}>
-        {/* User Profile Section */}
         <LinearGradient colors={["#2563EB", "#1F41B1"]} style={styles.profileSection}>
           <View style={styles.profileImageContainer}>
             <View style={styles.avatarCircle}>
@@ -125,27 +120,9 @@ const Sidebar = ({ navigation, onClose }) => {
           <Text style={styles.userName}>
             {userData?.firstName} {userData?.lastName}
           </Text>
-          <Text style={styles.userEmail}>{userData?.email}</Text>
+          <Text style={styles.userEmail}>{userData?.phoneNumber}</Text>
         </LinearGradient>
-        {/* QR Code Section */}
-        <View style={styles.qrSection}>
-          <Text style={styles.qrTitle}>Your QR Code</Text>
-          <View style={styles.qrContainer}>
-            {userData?.qrCode ? (
-              <QRCode
-                value={userData.qrCode}
-                size={200}
-                backgroundColor="white"
-                color="#1F41B1"
-              />
-            ) : (
-              <Text style={styles.noQrText}>QR Code not available</Text>
-            )}
-          </View>
-        </View>
-        {/* Divider */}
         <View style={styles.divider} />
-        {/* Menu Items */}
         <View style={styles.menuContainer}>
           <TouchableOpacity
             style={styles.menuItem}
@@ -153,6 +130,13 @@ const Sidebar = ({ navigation, onClose }) => {
             onPress={() => handleNavigation('Home')}>
             <MaterialIcons name="home" size={24} color="#1F41B1" />
             <Text style={styles.menuText}>Home</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+              style={styles.menuItem}
+              activeOpacity={0.7}
+              onPress={() => handleNavigation('UserDetails')}>
+              <MaterialIcons name="person" size={24} color="#1F41B1" />
+              <Text style={styles.menuText}>User Details</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.menuItem}
@@ -169,12 +153,10 @@ const Sidebar = ({ navigation, onClose }) => {
             <Text style={styles.menuText}>Scan QR</Text>
           </TouchableOpacity>
         </View>
-        {/* Logout Button */}
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.7}>
           <MaterialIcons name="logout" size={24} color="#FF3B30" />
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
-        {/* App Logo/Brand at Bottom */}
         <View style={styles.brandContainer}>
           <FontAwesome name="credit-card" size={28} color="#1F41B1" />
           <Text style={styles.brandText}>Bharat Transact</Text>
@@ -279,33 +261,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'rgba(255, 255, 255, 0.8)',
   },
-  qrSection: {
-    backgroundColor: 'white',
-    padding: 20,
-    marginTop: 10,
-    alignItems: 'center',
-  },
-  qrTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1F41B1',
-    marginBottom: 15,
-  },
-  qrContainer: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  noQrText: {
-    fontSize: 16,
-    color: '#666666',
-    textAlign: 'center',
-  },
   divider: {
     height: 1,
     backgroundColor: '#E5E5E5',
@@ -339,7 +294,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 16,
     marginHorizontal: 10,
-    marginTop: 10,
+    marginTop: 15,
     elevation: 2,
   },
   logoutText: {

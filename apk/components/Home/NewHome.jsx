@@ -10,6 +10,7 @@ import {
   ImageBackground,
   ScrollView,
   RefreshControl,
+  Platform,
 } from 'react-native';
 import { MaterialIcons, AntDesign, FontAwesome } from '@expo/vector-icons';
 import Sidebar from '../Sidebar/sidebar';
@@ -37,22 +38,37 @@ const NewHome = ({ navigation }) => {
     try {
       const token = await AsyncStorage.getItem('jwt_token');
       if (!token) {
+        console.log('No token found, redirecting to login');
         navigation.replace('OpenAppLoading');
         return;
       }
+
       const response = await axios.get(`${url_api}/api/user/get-user-by-JWT`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       if (response.data && response.data.userDetails) {
-        console.log(response.data.userDetails);
-        if(response.data.userDetails.mpin==""){
+        console.log('User data fetched successfully:', response.data.userDetails);
+        if(response.data.userDetails.mpin === ""){
           navigation.navigate('MpinCreate');
         }
         setUserData(response.data.userDetails);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
+      if (error.response) {
+        if (error.response.status === 401 || error.response.status === 403) {
+          await AsyncStorage.removeItem('jwt_token');
+          navigation.replace('OpenAppLoading');
+        } else {
+          console.error('Server error:', error.response.data);
+        }
+      } else {
+        console.error('Network error:', error.message);
+      }
     }
   };
 
@@ -180,12 +196,12 @@ const NewHome = ({ navigation }) => {
                   <Text style={styles.serviceText}>Bank Transfer</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.serviceItem} onPress={()=>{navigation.navigate("PayBills")}}>
+                {/* <TouchableOpacity style={styles.serviceItem} onPress={()=>{navigation.navigate("PayBills")}}>
                   <View style={styles.serviceIconContainer}>
                     <MaterialIcons name="payment" size={30} color="#1F41B1" />
                   </View>
                   <Text style={styles.serviceText}>Pay Bills</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
 
                 <TouchableOpacity 
                   style={styles.serviceItem}
@@ -258,7 +274,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: 50,
+    paddingTop: Platform.OS === 'ios' ? 50 : 20,
     paddingBottom: 15,
     backgroundColor: '#1F41B1',
   },

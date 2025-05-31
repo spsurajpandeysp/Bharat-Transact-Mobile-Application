@@ -4,7 +4,8 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { FontAwesome } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-
+import axios from 'axios';
+import { url_api } from '../../impUrl';
 const { height, width } = Dimensions.get('window');
 
 export default function Scanner({ navigation }) {
@@ -30,15 +31,25 @@ export default function Scanner({ navigation }) {
     setTorch(prevState => !prevState);
   }
 
-  function handleScan({ type, data }) {
-    if (!scanned) {
+  async function handleScan({ type, data }) {
+    if(!scanned){
       setScanned(true);
-      setScanResult(data);
-      console.log(data);
+    try{
+    const  response = await axios.post(`${url_api}/api/transaction/verify-qr-code`, { qrData: data });
+    if(response.data.valid){
       navigation.navigate('ScannedSendMoney', {
         scannedData: data
       });
+    }else{
+      Alert.alert('Invalid QR Code', 'Please scan a valid QR Code');
+      setScanned(false);
     }
+  }
+  catch(error){
+    Alert.alert('Error', 'Please Scan a valid QR Code again');
+    setScanned(false);
+  }
+}
   }
 
   return (

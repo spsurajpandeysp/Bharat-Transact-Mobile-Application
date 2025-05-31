@@ -8,5 +8,5 @@ router.get('/user',authMiddleware.verifyToken,transactionController.getTransacti
 router.post('/send-money',authMiddleware.verifyToken,transactionController.sendMoney)
 router.post('/bank-transfer',authMiddleware.verifyToken,transactionController.bankTransfer)
 router.post('/verify-account-details',authMiddleware.verifyToken,transactionController.verifyAccountDetails)
-
+router.post('/verify-qr-code',transactionController.verifyQrCode)
 module.exports = router

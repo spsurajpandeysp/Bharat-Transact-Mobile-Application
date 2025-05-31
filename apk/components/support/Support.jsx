@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -19,9 +19,9 @@ import { url_api } from '../../impUrl';
 const initialMessages = [
   {
     id: '1',
-    text: 'Hello! How can we help you today?',
+    text: 'Welcome to Bharat Transact Support. How can I help you today?',
     sender: 'support',
-    time: '09:00 AM',
+    time: '',
   },
 ];
 
@@ -30,6 +30,13 @@ const Support = ({ navigation }) => {
   const [messages, setMessages] = useState(initialMessages);
   const [input, setInput] = useState('');
   const flatListRef = useRef();
+
+  useEffect(() => {
+    const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    setMessages(prev => prev.map(msg => 
+      msg.id === '1' ? { ...msg, time: currentTime } : msg
+    ));
+  }, []);
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -105,7 +112,7 @@ const Support = ({ navigation }) => {
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 4 : 0}
       >
         <LinearGradient
           colors={['#2563EB', '#1F41B1']}
@@ -252,6 +259,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderTopWidth: 1,
     borderTopColor: '#E5E5E5',
+    paddingBottom: Platform.OS === 'ios' ? 30 : 12,
   },
   input: {
     flex: 1,

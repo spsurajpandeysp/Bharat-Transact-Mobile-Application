@@ -9,7 +9,8 @@ import {
   ActivityIndicator, 
   Dimensions,
   SafeAreaView,
-  StatusBar
+  StatusBar,
+  ScrollView
 } from 'react-native'
 import React, { useState, useEffect, useCallback } from 'react'
 import { OtpInput } from "react-native-otp-entry";
@@ -31,7 +32,6 @@ export default function MpinCreate({ navigation }) {
   const [errorMessage, setErrorMessage] = useState("");
   
   useEffect(() => {
-    // Get token from AsyncStorage when component mounts
     const getToken = async () => {
       try {
         const userToken = await AsyncStorage.getItem('jwt_token');
@@ -45,7 +45,7 @@ export default function MpinCreate({ navigation }) {
     getToken();
   }, []);
   
-  // Reset error message when pin inputs change
+
   useEffect(() => {
     if (errorMessage) setErrorMessage("");
   }, [mpin, confirmMpin]);
@@ -85,7 +85,6 @@ export default function MpinCreate({ navigation }) {
   }, [mpin, confirmMpin, token, navigation]);
 
   const handleVerifyMpin = useCallback(() => {
-    // Clear previous error
     setErrorMessage("");
     
     if (!mpin || mpin.length !== 4) {
@@ -112,6 +111,7 @@ export default function MpinCreate({ navigation }) {
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 20 : 0}
       >
         <LinearGradient
           colors={['#2563EB', '#1E40AF']}
@@ -123,90 +123,98 @@ export default function MpinCreate({ navigation }) {
         </LinearGradient>
 
         <View style={styles.content}>
-          <View style={styles.mpinSection}>
-            <FontAwesome name="lock" size={40} color="#2563EB" style={styles.lockIcon} />
-            <Text style={styles.mpinTitle}>Transaction Security</Text>
-            <Text style={styles.mpinSubtitle}>Create a 4-digit MPIN for secure transactions</Text>
-            
-            <Text style={styles.mpinLabel}>Create Your Transaction Pin</Text>
-            <OtpInput
-              numberOfDigits={4}
-              focusColor="#2563EB"
-              autoFocus={true}
-              hideStick={true}
-              blurOnFilled={true}
-              disabled={loading}
-              type="numeric"
-              secureTextEntry={true}
-              focusStickBlinkingDuration={500}
-              onTextChange={(text) => setMpin(text)}
-              onFilled={(text) => setMpin(text)}
-              textInputProps={{
-                accessibilityLabel: "Transaction PIN",
-              }}
-              theme={{
-                containerStyle: styles.otpContainer,
-                pinCodeContainerStyle: styles.pinCodeContainer,
-                focusStickStyle: styles.focusStick,
-                focusedPinCodeContainerStyle: styles.activePinCodeContainer,
-                filledPinCodeContainerStyle: styles.filledPinCodeContainer,
-                disabledPinCodeContainerStyle: styles.disabledPinCodeContainer,
-              }}
-            />
-            
-            <Text style={styles.mpinLabel}>Re-enter Your Transaction Pin</Text>
-            <OtpInput
-              numberOfDigits={4}
-              focusColor="#2563EB"
-              autoFocus={false}
-              hideStick={true}
-              blurOnFilled={true}
-              disabled={loading}
-              type="numeric"
-              secureTextEntry={true}
-              focusStickBlinkingDuration={500}
-              onTextChange={(text) => setConfirmMpin(text)}
-              onFilled={(text) => setConfirmMpin(text)}
-              textInputProps={{
-                accessibilityLabel: "Confirm Transaction PIN",
-              }}
-              theme={{
-                containerStyle: styles.otpContainer,
-                pinCodeContainerStyle: styles.pinCodeContainer,
-                focusStickStyle: styles.focusStick,
-                focusedPinCodeContainerStyle: styles.activePinCodeContainer,
-                filledPinCodeContainerStyle: styles.filledPinCodeContainer,
-                disabledPinCodeContainerStyle: styles.disabledPinCodeContainer,
-              }}
-            />
-            
-            {errorMessage ? (
-              <Text style={styles.errorMessage}>{errorMessage}</Text>
-            ) : null}
-          </View>
-          
-          <TouchableOpacity 
-            style={[
-              styles.submitBtn, 
-              loading && styles.submitBtnDisabled,
-              (!mpin || !confirmMpin) && styles.submitBtnDisabled
-            ]}
-            onPress={handleVerifyMpin}
-            disabled={loading || !mpin || !confirmMpin}
+          <ScrollView 
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
           >
-            {loading ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <>
-                <Text style={styles.submitBtnText}>Create Pin</Text>
-                <FontAwesome name="arrow-right" size={18} color="#fff" style={styles.submitIcon} />
-              </>
-            )}
-          </TouchableOpacity>
+            <View style={styles.mpinSection}>
+              <FontAwesome name="lock" size={40} color="#2563EB" style={styles.lockIcon} />
+              <Text style={styles.mpinTitle}>Transaction Security</Text>
+              <Text style={styles.mpinSubtitle}>Create a 4-digit MPIN for secure transactions</Text>
+              
+              <Text style={styles.mpinLabel}>Create Your Transaction Pin</Text>
+              <OtpInput
+                numberOfDigits={4}
+                focusColor="#2563EB"
+                autoFocus={true}
+                hideStick={true}
+                blurOnFilled={true}
+                disabled={loading}
+                type="numeric"
+                secureTextEntry={true}
+                focusStickBlinkingDuration={500}
+                onTextChange={(text) => setMpin(text)}
+                onFilled={(text) => setMpin(text)}
+                textInputProps={{
+                  accessibilityLabel: "Transaction PIN",
+                }}
+                theme={{
+                  containerStyle: styles.otpContainer,
+                  pinCodeContainerStyle: styles.pinCodeContainer,
+                  focusStickStyle: styles.focusStick,
+                  focusedPinCodeContainerStyle: styles.activePinCodeContainer,
+                  filledPinCodeContainerStyle: styles.filledPinCodeContainer,
+                  disabledPinCodeContainerStyle: styles.disabledPinCodeContainer,
+                }}
+              />
+              
+              <Text style={styles.mpinLabel}>Re-enter Your Transaction Pin</Text>
+              <OtpInput
+                numberOfDigits={4}
+                focusColor="#2563EB"
+                autoFocus={false}
+                hideStick={true}
+                blurOnFilled={true}
+                disabled={loading}
+                type="numeric"
+                secureTextEntry={true}
+                focusStickBlinkingDuration={500}
+                onTextChange={(text) => setConfirmMpin(text)}
+                onFilled={(text) => setConfirmMpin(text)}
+                textInputProps={{
+                  accessibilityLabel: "Confirm Transaction PIN",
+                }}
+                theme={{
+                  containerStyle: styles.otpContainer,
+                  pinCodeContainerStyle: styles.pinCodeContainer,
+                  focusStickStyle: styles.focusStick,
+                  focusedPinCodeContainerStyle: styles.activePinCodeContainer,
+                  filledPinCodeContainerStyle: styles.filledPinCodeContainer,
+                  disabledPinCodeContainerStyle: styles.disabledPinCodeContainer,
+                }}
+              />
+              
+              {errorMessage ? (
+                <Text style={styles.errorMessage}>{errorMessage}</Text>
+              ) : null}
+            </View>
+          </ScrollView>
           
-          <Text style={styles.securityNote}>
-            Your MPIN is confidential. Never share it with anyone.
-          </Text>
+          <View style={styles.bottomContainer}>
+            <TouchableOpacity 
+              style={[
+                styles.submitBtn, 
+                loading && styles.submitBtnDisabled,
+                (!mpin || !confirmMpin) && styles.submitBtnDisabled
+              ]}
+              onPress={handleVerifyMpin}
+              disabled={loading || !mpin || !confirmMpin}
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <>
+                  <Text style={styles.submitBtnText}>Create Pin</Text>
+                  <FontAwesome name="arrow-right" size={18} color="#fff" style={styles.submitIcon} />
+                </>
+              )}
+            </TouchableOpacity>
+            
+            <Text style={styles.securityNote}>
+              Your MPIN is confidential. Never share it with anyone.
+            </Text>
+          </View>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -247,10 +255,13 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 20,
     },
+    scrollContent: {
+        flexGrow: 1,
+    },
+    bottomContainer: {
+        paddingTop: 10,
+    },
     mpinSection: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
         backgroundColor: '#fff',
         borderRadius: 20,
         padding: 24,
@@ -260,15 +271,18 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
+        alignSelf: 'center',
     },
     lockIcon: {
         marginBottom: 16,
+        alignSelf: 'center',
     },
     mpinTitle: {
         fontSize: 22,
         fontWeight: '700',
         color: '#1E293B',
         marginBottom: 8,
+        alignSelf: 'center',
     },
     mpinSubtitle: {
         fontSize: 14,
@@ -291,6 +305,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-evenly',
         alignItems: 'center',
         marginBottom: 16,
+        alignSelf: 'center',
     },
     pinCodeContainer: {
         width: width * 0.13,
