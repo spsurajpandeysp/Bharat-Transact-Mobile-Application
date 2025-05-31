@@ -235,4 +235,32 @@ const getUserDetailsByPhoneNumber = async(req,res)=>{
     res.status(500).json({message:"Error fetching user details.", error:error.message})
   }
 }
-module.exports = {helpUser,updateUserDetails,getBalance,getUserDetailsByEmail,getUserByJWT,getUserDetailsByQrCode,getUserDetailsByPhoneNumber};
+const searchUsersByPhone = async(req, res) => {
+  const { phoneNumber } = req.body;
+  
+  if (!phoneNumber) {
+    return res.status(400).json({ message: "Phone number is required." });
+  }
+
+  try {
+    const users = await User.find({
+      phoneNumber: { $regex: `^${phoneNumber}`, $options: 'i' }
+    }).select('firstName lastName phoneNumber');
+
+    if (!users || users.length === 0) {
+      return res.status(404).json({ message: "No users found." });
+    }
+
+    res.status(200).json({ 
+      message: "Users found successfully!", 
+      users: users.map(user => ({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phoneNumber: user.phoneNumber
+      }))
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error searching users.", error: error.message });
+  }
+};
+module.exports = {helpUser,updateUserDetails,getBalance,getUserDetailsByEmail,getUserByJWT,getUserDetailsByQrCode,getUserDetailsByPhoneNumber,searchUsersByPhone};

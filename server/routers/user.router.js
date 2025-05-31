@@ -9,4 +9,5 @@ Router.post('/get-user-by-email',userController.getUserDetailsByEmail)
 Router.get('/get-user-by-JWT',authMiddleware.verifyToken,userController.getUserByJWT)
 Router.post('/get-user-by-qr-code',userController.getUserDetailsByQrCode)
 Router.post('/get-user-by-phone-number',userController.getUserDetailsByPhoneNumber)
+Router.post('/search-users-by-phone', userController.searchUsersByPhone)
 module.exports = Router
