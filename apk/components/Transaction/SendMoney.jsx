@@ -10,6 +10,7 @@ import {
   Dimensions,
   KeyboardAvoidingView,
   Platform,
+  FlatList,
 } from "react-native";
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -25,6 +26,9 @@ const SendMoney = ({ navigation, route }) => {
   const [recipient, setRecipient] = useState("");
   const [jwtToken, setJwtToken] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
 
   useEffect(() => {
     const fetchToken = async () => {
@@ -50,7 +54,46 @@ const SendMoney = ({ navigation, route }) => {
     }
   }, [route.params?.scannedData]);
 
-  const handleSendMoney = () => {
+  const searchUsers = async (phoneNumber) => {
+    if (phoneNumber.length < 3) {
+      setSearchResults([]);
+      setShowDropdown(false);
+      return;
+    }
+
+    setSearchLoading(true);
+    try {
+      const response = await axios.post(`${url}/api/user/search-users-by-phone`, {
+        phoneNumber
+      });
+      
+      if (response.data.users && response.data.users.length > 0) {
+        setSearchResults(response.data.users);
+        setShowDropdown(true);
+      } else {
+        setSearchResults([]);
+        setShowDropdown(false);
+      }
+    } catch (error) {
+      console.error("Error searching users:", error);
+      setSearchResults([]);
+      setShowDropdown(false);
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
+  const handleRecipientChange = (text) => {
+    setRecipient(text);
+    searchUsers(text);
+  };
+
+  const handleSelectUser = (user) => {
+    setRecipient(user.phoneNumber);
+    setShowDropdown(false);
+  };
+
+  const handleSendMoney = async () => {
     if (!amount || !recipient) {
       Alert.alert("Error", "Please enter both recipient and amount.");
       return;
@@ -63,15 +106,40 @@ const SendMoney = ({ navigation, route }) => {
     }
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      navigation.navigate('Mpin', {
-        amount: amount,
-        recipient: recipient,
-        fromScreen: 'SendMoney'
+    try {
+      const response = await axios.post(`${url}/api/user/get-user-by-phone-number`, {
+        phoneNumber: recipient
       });
-    }, 1000);
+
+      if (response.data.userDetails) {
+        navigation.navigate('Mpin', {
+          amount: amount,
+          recipient: recipient,
+          fromScreen: 'SendMoney'
+        });
+      } else {
+        Alert.alert("Error", "Recipient not found. Please check the phone number.");
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        Alert.alert("Error", "Recipient not found. Please check the phone number.");
+      } else {
+        Alert.alert("Error", "Something went wrong. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const renderUserItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.userItem}
+      onPress={() => handleSelectUser(item)}
+    >
+      <Text style={styles.userName}>{item.firstName} {item.lastName}</Text>
+      <Text style={styles.userPhone}>{item.phoneNumber}</Text>
+    </TouchableOpacity>
+  );
 
   return (
     <KeyboardAvoidingView 
@@ -96,14 +164,29 @@ const SendMoney = ({ navigation, route }) => {
               <FontAwesome name="phone" size={20} color="#2563EB" />
               <Text style={styles.inputLabel}>Recipient Phone Number</Text>
             </View>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter recipient's phone number"
-              placeholderTextColor="#666"
-              value={recipient}
-              onChangeText={setRecipient}
-              keyboardType="phone-pad"
-            />
+            <View style={styles.searchContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter recipient's phone number"
+                placeholderTextColor="#666"
+                value={recipient}
+                onChangeText={handleRecipientChange}
+                keyboardType="phone-pad"
+              />
+              {searchLoading && (
+                <ActivityIndicator size="small" color="#2563EB" style={styles.searchLoader} />
+              )}
+            </View>
+            {showDropdown && searchResults.length > 0 && (
+              <View style={styles.dropdown}>
+                <FlatList
+                  data={searchResults}
+                  renderItem={renderUserItem}
+                  keyExtractor={(item) => item.phoneNumber}
+                  style={styles.dropdownList}
+                />
+              </View>
+            )}
           </View>
 
           <View style={styles.inputContainer}>
@@ -191,6 +274,7 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     marginBottom: 20,
+    position: 'relative',
   },
   inputLabelContainer: {
     flexDirection: 'row',
@@ -203,6 +287,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: 8,
   },
+  searchContainer: {
+    position: 'relative',
+  },
   input: {
     backgroundColor: '#f8fafc',
     borderRadius: 10,
@@ -211,6 +298,45 @@ const styles = StyleSheet.create({
     color: '#333',
     borderWidth: 1,
     borderColor: '#e2e8f0',
+  },
+  searchLoader: {
+    position: 'absolute',
+    right: 15,
+    top: '50%',
+    transform: [{ translateY: -10 }],
+  },
+  dropdown: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    marginTop: 5,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    zIndex: 1000,
+  },
+  dropdownList: {
+    maxHeight: 200,
+  },
+  userItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+  },
+  userName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1e293b',
+  },
+  userPhone: {
+    fontSize: 14,
+    color: '#64748b',
+    marginTop: 4,
   },
   amountInputContainer: {
     flexDirection: 'row',
