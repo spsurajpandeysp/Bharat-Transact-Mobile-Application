@@ -37,7 +37,7 @@ const TransactionSuccessfull = ({ navigation, route }) => {
   return (
     <View style={styles.bg}>
       <View style={styles.headerRow}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={() => navigation.navigate('Home')}>
           <FontAwesome name="close" size={28} color="#222" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Payment Details</Text>
