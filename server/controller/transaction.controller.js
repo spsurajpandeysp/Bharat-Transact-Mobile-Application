@@ -16,6 +16,10 @@ const sendMoney = async (req, res) => {
       return res.status(400).json({ message: "Invalid input. or Required All Fields" });
   }
 
+  let message = "";
+  let messageSender = "";
+  let senderPhoneNumber = "";
+
   if(mpin){
     const user = await User.findById(userId);
     if(!user){
@@ -24,10 +28,18 @@ const sendMoney = async (req, res) => {
     if(user.mpin !== mpin){
       return res.status(400).json({ message: "Invalid MPIN." });
     }
+    
+    senderPhoneNumber = user.phoneNumber;
+
+    message = `Your Account has been credited with ₹${amount} by ${user.firstName} ${user.lastName}.`;
+ 
   }
 
   let retries = 3; 
   let lastError;
+
+
+
 
   while (retries > 0) {
     const session = await mongoose.startSession();
@@ -55,6 +67,8 @@ const sendMoney = async (req, res) => {
         if (currentBalance < transferAmount) {
           throw new Error("Insufficient funds.");
         }
+
+        messageSender = `Your Account has been debited with ₹${amount} by ${toAccount.firstName} ${toAccount.lastName}.`;
 
     
         const updatedFromAccount = await User.findOneAndUpdate(
@@ -91,6 +105,11 @@ const sendMoney = async (req, res) => {
         writeConcern: { w: 'majority' }
       });
 
+
+
+ 
+     
+
       await session.endSession();
       
      
@@ -101,8 +120,9 @@ const sendMoney = async (req, res) => {
       }).sort({ date: -1 });
 
 
-      const message = `You have received ${amount} from ${fromAccount.firstName} ${fromAccount.lastName}`;
+      console.log("sendMoney",recipient, message,senderPhoneNumber,messageSender)
       await sendOtpMessage(recipient, message);
+      await sendOtpMessage(senderPhoneNumber, messageSender);
 
       res.status(200).json({
         message: "Transaction successful!",
@@ -115,6 +135,8 @@ const sendMoney = async (req, res) => {
       await session.endSession();
       lastError = error;
       retries--;
+
+      console.log(error.message)
       
       if (retries === 0) {
         console.log("Transaction error after all retries:", error.message);
@@ -200,6 +222,11 @@ const bankTransfer = async (req, res) => {
       return res.status(400).json({ message: "Invalid input. or Required All Fields" });
   }
 
+  let message = "";
+  let senderPhoneNumber = "";
+  let messageSender = "";
+  let receiverPhoneNumber = "";
+
   if(mpin){
     const user = await User.findById(userId);
     if(!user){
@@ -208,6 +235,8 @@ const bankTransfer = async (req, res) => {
     if(user.mpin != mpin){ 
       return res.status(400).json({ message: "Invalid MPIN." });
     }
+    senderPhoneNumber = user.phoneNumber;
+    message = `Your Account has been credited with ₹${amount} by ${user.firstName} ${user.lastName} through bank transfer.`;
   }
 
   let retries = 3; 
@@ -246,6 +275,9 @@ const bankTransfer = async (req, res) => {
         if (currentBalance < transferAmount) {
           throw new Error("Insufficient funds.");
         }
+
+        receiverPhoneNumber = toAccount.phoneNumber;
+        messageSender = `your Account has been debited with ₹${amount} by ${toAccount.firstName} ${toAccount.lastName} through bank transfer.`;
 
         const updatedFromAccount = await User.findOneAndUpdate(
           { _id: userId, balance: { $gte: transferAmount } },
@@ -290,9 +322,10 @@ const bankTransfer = async (req, res) => {
         amount: handleAmount(amount)
       }).sort({ date: -1 });
 
-      const message = `You have received ${amount} from ${fromAccount.firstName} ${fromAccount.lastName}`;
-      await sendOtpMessage(toAccount.phoneNumber, message);
-      
+
+      await sendOtpMessage(receiverPhoneNumber, message);
+      await sendOtpMessage(senderPhoneNumber, messageSender);
+
       res.status(200).json({
         message: "Transaction successful!",
         transactionId: transaction._id,
