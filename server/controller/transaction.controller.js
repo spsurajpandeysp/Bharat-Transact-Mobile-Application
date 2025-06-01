@@ -290,6 +290,9 @@ const bankTransfer = async (req, res) => {
         amount: handleAmount(amount)
       }).sort({ date: -1 });
 
+      const message = `You have received ${amount} from ${fromAccount.firstName} ${fromAccount.lastName}`;
+      await sendOtpMessage(toAccount.phoneNumber, message);
+      
       res.status(200).json({
         message: "Transaction successful!",
         transactionId: transaction._id,
