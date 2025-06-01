@@ -265,7 +265,8 @@ const forgetPasword = async (req, res) => {
         const resetOtpExpiry = new Date(Date.now() + 10 * 60 * 1000); 
 
  
-
+        const message = `Your OTP is ${resetOtp} is valid for 5 minutes`;
+        await sendOtpMessage(phoneNumber, message);
   
         user.resetOtp = resetOtp;
         user.resetOtpExpiry = resetOtpExpiry;
