@@ -1,7 +1,7 @@
 const {User} = require('../models/user.model')
 const {Transaction} = require('../models/transaction.model')
 const mongoose = require('mongoose')
-
+const sendOtpMessage = require('../service/mobileOtp');
 
 const handleAmount = (amount) => {
     return parseFloat(parseFloat(amount).toFixed(2));
@@ -99,6 +99,10 @@ const sendMoney = async (req, res) => {
         toUser: (await User.findOne({ phoneNumber: recipient }))._id,
         amount: handleAmount(amount)
       }).sort({ date: -1 });
+
+
+      const message = `You have received ${amount} from ${fromAccount.firstName} ${fromAccount.lastName}`;
+      await sendOtpMessage(recipient, message);
 
       res.status(200).json({
         message: "Transaction successful!",
