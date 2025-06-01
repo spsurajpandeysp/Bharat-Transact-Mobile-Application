@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt')
 const jwt = require ('jsonwebtoken')
 const {User} = require('../models/user.model')
 require('dotenv').config();
-
+const sendOtpMessage = require('../service/mobileOtp');
 
 
 const generateAccountNumber = () => {
@@ -191,6 +191,9 @@ const UserSignUp = async (req, res) => {
         const formattedTransactionId = await createUniqueAccount();
 
         console.log("formattedTransactionId",formattedTransactionId)
+
+        const message = `Your OTP is ${otp} is valid for 5 minutes`;
+        await sendOtpMessage(phoneNumber, message);
 
         console.log("fds")
         const newUser = new User({
