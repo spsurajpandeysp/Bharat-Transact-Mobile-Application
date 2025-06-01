@@ -1,5 +1,6 @@
-const accountSid = 'AC76ceccf6bb1d56d3dcf0f730c1bc783d';
-const authToken = '1f8c831a0671e940a9434457d6c78ef5';
+
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
 const client = require('twilio')(accountSid, authToken);
 
 const sendOtpMessage = async (mobileNumber, messg, fromNumber = '+17073532494') => {
