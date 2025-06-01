@@ -128,6 +128,10 @@ const authMiddleware = async (req, res, next) => {
     const otpCode = Math.floor(1000 + Math.random() * 9000);
     const otpExpiry = Date.now() + 10 * 60 * 1000; 
 
+    const message = `Your OTP is ${otpCode} is valid for 5 minutes`;
+
+    await sendOtpMessage(phoneNumber, message);
+
     await User.findOneAndUpdate(
       { phoneNumber },
       { 
