@@ -1,4 +1,4 @@
-# 🇮🇳 Bharat Transact – Mobile Payment App
+# Bharat Transact – Mobile Payment App
 
 **Bharat Transact** is a fast, secure, and user-friendly digital payment mobile application built for India. It allows users to send and receive payments, check balances, view transaction history, and pay using QR codes. It features secure authentication, OTP-based login, and a smart chatbot for user support.
 
@@ -108,8 +108,8 @@ Feel free to open issues, fork the repo, and submit pull requests.
 
 **Suraj Pandey**
 Full Stack Developer | MERN | React Native  
-- GitHub: [@spsurajpandeysp](https://github.com/spsurajpandeysp/Bharat-Transact-Mobile-Application)  
-- LinkedIn: [linkedin.com/in/spsurajpandeysp](https://linkedin.com/in/spsurajpandeysp/Bharat-Transact-Mobile-Application)
+- GitHub: [@spsurajpandeysp](https://github.com/spsurajpandeysp)  
+- LinkedIn: [linkedin.com/in/spsurajpandeysp](https://linkedin.com/in/spsurajpandeysp)
 
 ---
 
