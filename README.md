@@ -106,7 +106,7 @@ Feel free to open issues, fork the repo, and submit pull requests.
 
 ## 👨‍💻 Developed By
 
-**Suraj Pandey**  and **Tanmay Ahuja**
+**Suraj Pandey**
 Full Stack Developer | MERN | React Native  
 - GitHub: [@spsurajpandeysp](https://github.com/spsurajpandeysp/Bharat-Transact-Mobile-Application)  
 - LinkedIn: [linkedin.com/in/spsurajpandeysp](https://linkedin.com/in/spsurajpandeysp/Bharat-Transact-Mobile-Application)
