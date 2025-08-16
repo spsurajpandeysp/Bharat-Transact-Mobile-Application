@@ -106,10 +106,12 @@ Feel free to open issues, fork the repo, and submit pull requests.
 
 ## 👨‍💻 Developed By
 
-**Suraj Pandey**
+**Suraj Pandey and Tanmay Ahuja**
 Full Stack Developer | MERN | React Native  
-- GitHub: [@spsurajpandeysp](https://github.com/spsurajpandeysp)  
+- GitHub: [@spsurajpandeysp](https://github.com/spsurajpandeysp)
+- Github: [@tanmayahuja71](https://github.com/tanmayahuja71) 
 - LinkedIn: [linkedin.com/in/spsurajpandeysp](https://linkedin.com/in/spsurajpandeysp)
+- LinkedIn:[linkedin.com/in/tanmayahuja71](https://linkedin.com/in/tanmayahuja71)
 
 ---
 
