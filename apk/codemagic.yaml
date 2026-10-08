@@ -1,0 +1,50 @@
+workflows:
+  android-apk:
+    name: Bharat Transact - Android APK
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      node: 20.18.0
+      java: 17
+      vars:
+        NODE_OPTIONS: --max-old-space-size=4096
+      # Optional: to sign with your own release keystore, upload it in
+      # Codemagic (Team settings > Code signing identities > Android keystores)
+      # and uncomment the line below with the reference name you gave it.
+      # android_signing:
+      #   - bharat_transact_keystore
+    cache:
+      cache_paths:
+        - $HOME/.gradle/caches
+        - $CM_BUILD_DIR/node_modules
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+        - pattern: master
+          include: true
+      cancel_previous_builds: true
+    scripts:
+      - name: Install dependencies
+        script: npm ci || npm install
+      - name: Generate native Android project (Expo prebuild)
+        script: npx expo prebuild --platform android --clean --no-install
+      - name: Set Android SDK location
+        script: echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/android/local.properties"
+      - name: Build release APK
+        script: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+    artifacts:
+      - $CM_BUILD_DIR/android/app/build/outputs/apk/**/*.apk
+      - $CM_BUILD_DIR/android/app/build/outputs/**/mapping.txt
+    publishing:
+      email:
+        recipients:
+          - spandey@mondee.com
+        notify:
+          success: true
+          failure: true
